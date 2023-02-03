@@ -110,4 +110,16 @@ func (repositorio usuarios) Atualizar(id uint64, usuario modelos.Usuario) error 
 	return nil
 }
 
+func (repositorio usuarios) Deletar(id uint64) error {
+	linhas, erro := repositorio.db.Query(
+		"delete from usuarios where id = ?", id,
+	)
+	if erro != nil {
+		return erro
+	}
+	defer linhas.Close()
+
+	return nil
+}
+
 // o repositório simplesmente recebe um dado e altera o banco

@@ -110,16 +110,36 @@ func (repositorio usuarios) Atualizar(id uint64, usuario modelos.Usuario) error 
 	return nil
 }
 
+// Deleta um usuario do banco de dados
 func (repositorio usuarios) Deletar(id uint64) error {
-	linhas, erro := repositorio.db.Query(
+	statement, erro := repositorio.db.Query(
 		"delete from usuarios where id = ?", id,
 	)
 	if erro != nil {
 		return erro
 	}
-	defer linhas.Close()
+	defer statement.Close()
 
 	return nil
+}
+
+// Busca um usuário por email e retorna seu id e senha com hash
+func (repositorio usuarios) BuscarPorEmail(email string) (modelos.Usuario, error) {
+	linha, erro := repositorio.db.Query("select id, senha from usuarios where email = ?", email)
+	if erro != nil {
+		return modelos.Usuario{}, erro
+	}
+	defer linha.Close()
+
+	var usuario modelos.Usuario
+
+	if linha.Next() {
+		if erro = linha.Scan(&usuario.ID, &usuario.Senha); erro != nil {
+			return modelos.Usuario{}, erro
+		}
+	}
+
+	return usuario, nil
 }
 
 // o repositório simplesmente recebe um dado e altera o banco

@@ -1,7 +1,7 @@
 package repositorios
 
 import (
-	"api/src/modelos"
+	"api/internal/domain/entities"
 	"database/sql"
 )
 
@@ -13,14 +13,14 @@ func NovoRepositorioDePublicacoes(db *sql.DB) *Publicacoes {
 	return &Publicacoes{db}
 }
 
-func (repositorio Publicacoes) Criar(publicacao modelos.Publicacao) (uint64, error) {
+func (repositorio Publicacoes) Criar(post entities.Post) (uint64, error) {
 	statement, erro := repositorio.db.Prepare("insert into publicacoes (titulo, conteudo, autor_id) values (?, ?, ?)")
 	if erro != nil {
 		return 0, erro
 	}
 	defer statement.Close()
 
-	resultado, erro := statement.Exec(publicacao.Titulo, publicacao.Conteudo, publicacao.AutorID)
+	resultado, erro := statement.Exec(post.Title, post.Content, post.AuthorID)
 	if erro != nil {
 		return 0, erro
 	}
@@ -33,38 +33,38 @@ func (repositorio Publicacoes) Criar(publicacao modelos.Publicacao) (uint64, err
 	return uint64(ultimoIDInserido), nil
 }
 
-func (repositorio Publicacoes) BuscarPorID(publicacaoID uint64) (modelos.Publicacao, error) {
+func (repositorio Publicacoes) BuscarPorID(publicacaoID uint64) (entities.Post, error) {
 	linha, erro := repositorio.db.Query(`
 		select p.*, u.nick from
 		publicacoes p inner join usuarios u
 		on u.id = p.autor_id where p.id = ?
 	`, publicacaoID)
 	if erro != nil {
-		return modelos.Publicacao{}, erro
+		return entities.Post{}, erro
 	}
 
 	defer linha.Close()
 
-	var publicacao modelos.Publicacao
+	var post entities.Post
 
 	if linha.Next() {
 		if erro = linha.Scan(
-			&publicacao.ID,
-			&publicacao.Titulo,
-			&publicacao.Conteudo,
-			&publicacao.AutorID,
-			&publicacao.Curtidas,
-			&publicacao.CriadaEm,
-			&publicacao.AutorNick,
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.AuthorNick,
 		); erro != nil {
-			return modelos.Publicacao{}, erro
+			return entities.Post{}, erro
 		}
 	}
 
-	return publicacao, nil
+	return post, nil
 }
 
-func (repositorio Publicacoes) Buscar(usuarioID uint64) ([]modelos.Publicacao, error) {
+func (repositorio Publicacoes) Buscar(usuarioID uint64) ([]entities.Post, error) {
 	linhas, erro := repositorio.db.Query(`
 		select distinct p.*, u.nick from publicacoes p
 		inner join usuarios u on u.id = p.autor_id
@@ -77,35 +77,35 @@ func (repositorio Publicacoes) Buscar(usuarioID uint64) ([]modelos.Publicacao, e
 	}
 	defer linhas.Close()
 
-	var publicacoes []modelos.Publicacao
+	var posts []entities.Post
 
 	for linhas.Next() {
-		var publicacao modelos.Publicacao
+		var post entities.Post
 		if erro = linhas.Scan(
-			&publicacao.ID,
-			&publicacao.Titulo,
-			&publicacao.Conteudo,
-			&publicacao.AutorID,
-			&publicacao.Curtidas,
-			&publicacao.CriadaEm,
-			&publicacao.AutorNick,
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.AuthorNick,
 		); erro != nil {
 			return nil, erro
 		}
 
-		publicacoes = append(publicacoes, publicacao)
+		posts = append(posts, post)
 	}
-	return publicacoes, nil
+	return posts, nil
 }
 
-func (repositorio Publicacoes) Atualizar(publicacaoID uint64, publicacao modelos.Publicacao) error {
+func (repositorio Publicacoes) Atualizar(publicacaoID uint64, post entities.Post) error {
 	statement, erro := repositorio.db.Prepare("update publicacoes set titulo = ?, conteudo = ? where id = ?")
 	if erro != nil {
 		return erro
 	}
 	defer statement.Close()
 
-	if _, erro = statement.Exec(publicacao.Titulo, publicacao.Conteudo, publicacaoID); erro != nil {
+	if _, erro = statement.Exec(post.Title, post.Content, publicacaoID); erro != nil {
 		return erro
 	}
 
@@ -124,7 +124,7 @@ func (repositorio Publicacoes) Deletar(publicacaoID uint64) error {
 	return nil
 }
 
-func (repositorio Publicacoes) BuscarPorUsuario(usuarioID uint64) ([]modelos.Publicacao, error) {
+func (repositorio Publicacoes) BuscarPorUsuario(usuarioID uint64) ([]entities.Post, error) {
 	linhas, erro := repositorio.db.Query(`
 		select p.*, u.nick from publicacoes p
 		join usuarios u on u.id = p.autor_id
@@ -135,25 +135,25 @@ func (repositorio Publicacoes) BuscarPorUsuario(usuarioID uint64) ([]modelos.Pub
 	}
 	defer linhas.Close()
 
-	var publicacoes []modelos.Publicacao
+	var posts []entities.Post
 
 	for linhas.Next() {
-		var publicacao modelos.Publicacao
+		var post entities.Post
 		if erro = linhas.Scan(
-			&publicacao.ID,
-			&publicacao.Titulo,
-			&publicacao.Conteudo,
-			&publicacao.AutorID,
-			&publicacao.Curtidas,
-			&publicacao.CriadaEm,
-			&publicacao.AutorNick,
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.AuthorNick,
 		); erro != nil {
 			return nil, erro
 		}
 
-		publicacoes = append(publicacoes, publicacao)
+		posts = append(posts, post)
 	}
-	return publicacoes, nil
+	return posts, nil
 }
 
 func (repositorio Publicacoes) Curtir(publicacaoID uint64) error {

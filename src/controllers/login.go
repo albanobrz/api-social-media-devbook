@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	"api/internal/domain/entities"
 	"api/src/autenticacao"
 	"api/src/banco"
-	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"api/src/seguranca"
@@ -19,8 +19,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		respostas.Erro(w, http.StatusUnprocessableEntity, erro)
 	}
 
-	var usuario modelos.Usuario
-	if erro = json.Unmarshal(corpoRequisicao, &usuario); erro != nil {
+	var user entities.User
+	if erro = json.Unmarshal(corpoRequisicao, &user); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
@@ -32,13 +32,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
-	usuarioSalvoNoBanco, erro := repositorio.BuscarPorEmail(usuario.Email)
+	usuarioSalvoNoBanco, erro := repositorio.BuscarPorEmail(user.Email)
 	if erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
 
-	if erro = seguranca.VerificarSenha(usuarioSalvoNoBanco.Senha, usuario.Senha); erro != nil {
+	if erro = seguranca.VerificarSenha(usuarioSalvoNoBanco.Password, user.Password); erro != nil {
 		respostas.Erro(w, http.StatusUnauthorized, erro)
 		return
 	}

@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	"api/internal/domain/entities"
 	"api/src/autenticacao"
 	"api/src/banco"
-	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"encoding/json"
@@ -28,15 +28,15 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var publicacao modelos.Publicacao
-	if erro = json.Unmarshal(corpoRequisicao, &publicacao); erro != nil {
+	var post entities.Post
+	if erro = json.Unmarshal(corpoRequisicao, &post); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
 
-	publicacao.AutorID = usuarioID
+	post.AuthorID = usuarioID
 
-	if erro = publicacao.Preparar(); erro != nil {
+	if erro = post.Prepare(); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
@@ -49,13 +49,13 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	repositorio := repositorios.NovoRepositorioDePublicacoes(db)
-	publicacao.ID, erro = repositorio.Criar(publicacao)
+	post.ID, erro = repositorio.Criar(post)
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
 
-	respostas.JSON(w, http.StatusCreated, publicacao)
+	respostas.JSON(w, http.StatusCreated, post)
 }
 
 func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
@@ -135,7 +135,7 @@ func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
-	if publicacaoSalvaNoBanco.AutorID != usuarioID {
+	if publicacaoSalvaNoBanco.AuthorID != usuarioID {
 		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível atualizar uma publi que não é sua"))
 		return
 	}
@@ -146,18 +146,18 @@ func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var publicacao modelos.Publicacao
-	if erro = json.Unmarshal(corpoRequisicao, &publicacao); erro != nil {
+	var post entities.Post
+	if erro = json.Unmarshal(corpoRequisicao, &post); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
 
-	if erro = publicacao.Preparar(); erro != nil {
+	if erro = post.Prepare(); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
 
-	if erro = repositorio.Atualizar(publicacaoID, publicacao); erro != nil {
+	if erro = repositorio.Atualizar(publicacaoID, post); erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
@@ -193,7 +193,7 @@ func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
-	if publicacaoSalvaNoBanco.AutorID != usuarioID {
+	if publicacaoSalvaNoBanco.AuthorID != usuarioID {
 		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível deletar uma publi que não é sua"))
 		return
 	}

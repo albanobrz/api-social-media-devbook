@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	"api/internal/domain/entities"
 	"api/src/autenticacao"
 	"api/src/banco"
-	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"api/src/seguranca"
@@ -24,13 +24,13 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var usuario modelos.Usuario
-	if erro = json.Unmarshal(corpoRequest, &usuario); erro != nil {
+	var user entities.User
+	if erro = json.Unmarshal(corpoRequest, &user); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
 
-	if erro := usuario.Preparar("cadastro"); erro != nil {
+	if erro := user.Preparar("cadastro"); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
@@ -42,13 +42,13 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 	}
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
-	usuario.ID, erro = repositorio.Criar(usuario)
+	user.ID, erro = repositorio.Criar(user)
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
 
-	respostas.JSON(w, http.StatusCreated, usuario)
+	respostas.JSON(w, http.StatusCreated, user)
 }
 
 func BuscarUsuarios(w http.ResponseWriter, r *http.Request) {
@@ -117,13 +117,13 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var usuario modelos.Usuario
-	if erro = json.Unmarshal(corpoRequisicao, &usuario); erro != nil {
+	var user entities.User
+	if erro = json.Unmarshal(corpoRequisicao, &user); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
 
-	if erro = usuario.Preparar("edicao"); erro != nil {
+	if erro = user.Preparar("edicao"); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
@@ -136,7 +136,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
-	if erro = repositorio.Atualizar(usuarioID, usuario); erro != nil {
+	if erro = repositorio.Atualizar(usuarioID, user); erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}
@@ -321,8 +321,8 @@ func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
 
 	corpoRequisicao, erro := ioutil.ReadAll(r.Body)
 
-	var senha modelos.Senha
-	if erro = json.Unmarshal(corpoRequisicao, &senha); erro != nil {
+	var password entities.Password
+	if erro = json.Unmarshal(corpoRequisicao, &password); erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
@@ -341,12 +341,12 @@ func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if erro = seguranca.VerificarSenha(senhaSalvaNoBanco, senha.Atual); erro != nil {
+	if erro = seguranca.VerificarSenha(senhaSalvaNoBanco, password.Current); erro != nil {
 		respostas.Erro(w, http.StatusUnauthorized, errors.New("a senha atual não condiz com a que está no banco"))
 		return
 	}
 
-	senhaComHash, erro := seguranca.Hash(senha.Nova)
+	senhaComHash, erro := seguranca.Hash(password.New)
 	if erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return

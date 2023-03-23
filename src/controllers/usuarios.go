@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"api/internal/domain/entities"
+	database "api/internal/infrastructure/mysql"
 	"api/src/autenticacao"
-	"api/src/banco"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"api/src/seguranca"
@@ -35,7 +35,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -54,7 +54,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 func BuscarUsuarios(w http.ResponseWriter, r *http.Request) {
 	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 	}
@@ -77,7 +77,7 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 	}
@@ -128,7 +128,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -163,7 +163,7 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -199,7 +199,7 @@ func SeguirUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -234,7 +234,7 @@ func PararDeSeguirUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -258,7 +258,7 @@ func BuscarSeguidores(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -283,7 +283,7 @@ func BuscarSeguindo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -327,7 +327,7 @@ func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return

@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"api/internal/domain/entities"
+	database "api/internal/infrastructure/mysql"
 	"api/src/autenticacao"
-	"api/src/banco"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"encoding/json"
@@ -41,7 +41,7 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -65,7 +65,7 @@ func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -91,7 +91,7 @@ func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -122,7 +122,7 @@ func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -180,7 +180,7 @@ func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -214,7 +214,7 @@ func BuscarPublicacoesPorUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -239,7 +239,7 @@ func CurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
@@ -263,7 +263,7 @@ func DescurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return

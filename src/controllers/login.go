@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"api/internal/domain/entities"
+	database "api/internal/infrastructure/mysql"
 	"api/src/autenticacao"
-	"api/src/banco"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"api/src/seguranca"
@@ -25,7 +25,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, erro := banco.Conectar()
+	db, erro := database.Connect()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 	}

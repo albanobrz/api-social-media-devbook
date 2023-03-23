@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"api/src/seguranca"
+	"api/src/security"
 
 	"github.com/badoux/checkmail"
 )
@@ -20,13 +20,13 @@ type User struct {
 	CreatedAt time.Time `json:"CriadoEm,omitempty"`
 }
 
-// Preparar vai chamar os métodos para validar e formatar os usuário recebidos
-func (user *User) Preparar(etapa string) error {
-	if err := user.validate(etapa); err != nil {
+// Prepare vai chamar os métodos para validar e formatar os usuário recebidos
+func (user *User) Prepare(step string) error {
+	if err := user.validate(step); err != nil {
 		return err
 	}
 
-	if erro := user.format(etapa); erro != nil {
+	if erro := user.format(step); erro != nil {
 		return erro
 	}
 	return nil
@@ -62,7 +62,7 @@ func (user *User) format(step string) error {
 	user.Email = strings.TrimSpace(user.Email)
 
 	if step == "cadastro" {
-		senhaHash, err := seguranca.Hash(user.Password)
+		senhaHash, err := security.Hash(user.Password)
 		if err != nil {
 			return err
 		}

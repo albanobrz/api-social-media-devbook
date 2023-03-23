@@ -1,7 +1,7 @@
 package rotas
 
 import (
-	"api/src/controllers"
+	"api/internal/infrastructure/http/controllers"
 	"net/http"
 )
 
@@ -9,49 +9,49 @@ var rotasPublicacoes = []Rota{
 	{
 		URI:                "/publicacoes",
 		Metodo:             http.MethodPost,
-		Funcao:             controllers.CriarPublicacao,
+		Funcao:             controllers.CreatePost,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/publicacoes",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarPublicacoes,
+		Funcao:             controllers.GetPosts,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/publicacoes/{publicacaoId}",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarPublicacao,
+		Funcao:             controllers.GetPost,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/publicacoes/{publicacaoId}",
 		Metodo:             http.MethodPut,
-		Funcao:             controllers.AtualizarPublicacao,
+		Funcao:             controllers.UpdatePost,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/publicacoes/{publicacaoId}",
 		Metodo:             http.MethodDelete,
-		Funcao:             controllers.DeletarPublicacao,
+		Funcao:             controllers.DeletePost,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}/publicacoes",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarPublicacoesPorUsuario,
+		Funcao:             controllers.GetPostsByUser,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/publicacoes/{publicacaoId}/curtir",
 		Metodo:             http.MethodPost,
-		Funcao:             controllers.CurtirPublicacao,
+		Funcao:             controllers.LikePost,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/publicacoes/{publicacaoId}/descurtir",
 		Metodo:             http.MethodPost,
-		Funcao:             controllers.DescurtirPublicacao,
+		Funcao:             controllers.DislikePost,
 		RequerAutenticacao: true,
 	},
 }

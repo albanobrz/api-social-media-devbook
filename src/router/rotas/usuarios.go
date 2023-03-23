@@ -1,7 +1,7 @@
 package rotas
 
 import (
-	"api/src/controllers"
+	"api/internal/infrastructure/http/controllers"
 	"net/http"
 )
 
@@ -9,61 +9,61 @@ var rotasUsuarios = []Rota{
 	{
 		URI:                "/usuarios",
 		Metodo:             http.MethodPost,
-		Funcao:             controllers.CriarUsuario,
+		Funcao:             controllers.CreateUser,
 		RequerAutenticacao: false,
 	},
 	{
 		URI:                "/usuarios",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarUsuarios,
+		Funcao:             controllers.GetUsers,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarUsuario,
+		Funcao:             controllers.GetUser,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}",
 		Metodo:             http.MethodPut,
-		Funcao:             controllers.AtualizarUsuario,
+		Funcao:             controllers.UpdateUser,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}",
 		Metodo:             http.MethodDelete,
-		Funcao:             controllers.DeletarUsuario,
+		Funcao:             controllers.DeleteUser,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}/seguir",
 		Metodo:             http.MethodPost,
-		Funcao:             controllers.SeguirUsuario,
+		Funcao:             controllers.FollowUser,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}/parardeseguir",
 		Metodo:             http.MethodDelete,
-		Funcao:             controllers.PararDeSeguirUsuario,
+		Funcao:             controllers.StopFollowingUser,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}/seguidores",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarSeguidores,
+		Funcao:             controllers.GetFollowers,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}/seguindo",
 		Metodo:             http.MethodGet,
-		Funcao:             controllers.BuscarSeguindo,
+		Funcao:             controllers.GetFollowing,
 		RequerAutenticacao: true,
 	},
 	{
 		URI:                "/usuarios/{usuarioId}/atualizar-senha",
 		Metodo:             http.MethodPost,
-		Funcao:             controllers.AtualizarSenha,
+		Funcao:             controllers.UpdatePassword,
 		RequerAutenticacao: true,
 	},
 }

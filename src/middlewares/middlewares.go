@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"api/src/autenticacao"
-	"api/src/respostas"
+	"api/src/auth"
+	"api/src/responses"
 	"log"
 	"net/http"
 )
@@ -19,8 +19,8 @@ func Logger(proximaFuncao http.HandlerFunc) http.HandlerFunc {
 func Autenticar(proximaFuncao http.HandlerFunc) http.HandlerFunc {
 	// Handlerfunc é o (w, r) comum das outras requisições
 	return func(w http.ResponseWriter, r *http.Request) {
-		if erro := autenticacao.ValidarToken(r); erro != nil {
-			respostas.Erro(w, http.StatusUnauthorized, erro)
+		if erro := auth.ValidateToken(r); erro != nil {
+			responses.Error(w, http.StatusUnauthorized, erro)
 			return
 		}
 		proximaFuncao(w, r)

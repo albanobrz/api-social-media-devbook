@@ -1,4 +1,4 @@
-package autenticacao
+package auth
 
 import (
 	"api/internal/infrastructure/config"
@@ -13,7 +13,7 @@ import (
 )
 
 // Cria um token com permissões para o usuário
-func CriarToken(usuarioID uint64) (string, error) {
+func CreateToken(usuarioID uint64) (string, error) {
 	permissoes := jwt.MapClaims{}
 	permissoes["authorized"] = true
 	permissoes["exp"] = time.Now().Add(time.Hour * 6).Unix()
@@ -24,7 +24,7 @@ func CriarToken(usuarioID uint64) (string, error) {
 }
 
 // Verifica se o token passado na requisição é válido
-func ValidarToken(r *http.Request) error {
+func ValidateToken(r *http.Request) error {
 	tokenString := extraiToken(r)
 	token, erro := jwt.Parse(tokenString, retornarChaveDeVerificacao)
 	if erro != nil {
@@ -37,17 +37,17 @@ func ValidarToken(r *http.Request) error {
 	return errors.New("Token inválido")
 }
 
-func ExtrairUsuarioID(r *http.Request) (uint64, error) {
+func GetUserID(r *http.Request) (uint64, error) {
 	tokenString := extraiToken(r)
-	token, erro := jwt.Parse(tokenString, retornarChaveDeVerificacao)
-	if erro != nil {
-		return 0, erro
+	token, err := jwt.Parse(tokenString, retornarChaveDeVerificacao)
+	if err != nil {
+		return 0, err
 	}
 
 	if permissoes, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		usuarioID, erro := strconv.ParseUint(fmt.Sprintf("%.0f", permissoes["usuarioId"]), 10, 64)
-		if erro != nil {
-			return 0, erro
+		usuarioID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissoes["usuarioId"]), 10, 64)
+		if err != nil {
+			return 0, err
 		}
 
 		return usuarioID, nil

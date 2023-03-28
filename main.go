@@ -2,7 +2,7 @@ package main
 
 import (
 	"api/internal/infrastructure/config"
-	"api/src/router"
+	router "api/internal/infrastructure/http/routes"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 
 func main() {
 	config.Load()
-	r := router.Gerar()
+	r := router.Create()
 
 	fmt.Printf("Escutando na porta %d", config.Port)
 

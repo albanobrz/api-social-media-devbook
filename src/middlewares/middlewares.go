@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"api/internal/infrastructure/http/responses"
 	"api/src/auth"
-	"api/src/responses"
 	"log"
 	"net/http"
 )
@@ -16,7 +16,7 @@ func Logger(proximaFuncao http.HandlerFunc) http.HandlerFunc {
 }
 
 // Verifica se o usuário fazendo a requisição está autenticado
-func Autenticar(proximaFuncao http.HandlerFunc) http.HandlerFunc {
+func Authenticate(proximaFuncao http.HandlerFunc) http.HandlerFunc {
 	// Handlerfunc é o (w, r) comum das outras requisições
 	return func(w http.ResponseWriter, r *http.Request) {
 		if erro := auth.ValidateToken(r); erro != nil {

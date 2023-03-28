@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"api/internal/domain/entities"
-	database "api/internal/infrastructure/mysql"
+	database "api/internal/infrastructure/database"
+	"api/internal/infrastructure/database/repositories"
+	"api/internal/infrastructure/http/responses"
 	"api/src/auth"
-	"api/src/repositories"
-	"api/src/responses"
 	"api/src/security"
 	"encoding/json"
 	"io/ioutil"

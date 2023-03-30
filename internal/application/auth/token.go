@@ -17,7 +17,7 @@ func CreateToken(userID uint64) (string, error) {
 	permissions := jwt.MapClaims{}
 	permissions["authorized"] = true
 	permissions["exp"] = time.Now().Add(time.Hour * 6).Unix()
-	permissions["usuarioId"] = userID
+	permissions["userID"] = userID
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissions)
 	return token.SignedString([]byte(config.SecretKey))
@@ -45,14 +45,14 @@ func GetUserID(r *http.Request) (uint64, error) {
 	}
 
 	if permissions, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["usuarioId"]), 10, 64)
+		userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["userID"]), 10, 64)
 		if err != nil {
 			return 0, err
 		}
 
 		return userID, nil
 	}
-	return 0, errors.New("token inválido")
+	return 0, errors.New("Invalid token")
 }
 
 func extractToken(r *http.Request) string {

@@ -85,7 +85,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 func GetPost(w http.ResponseWriter, r *http.Request) {
 	// o params e a string é como passou na rota
 	params := mux.Vars(r)
-	postID, err := strconv.ParseUint(params["publicacaoId"], 10, 64)
+	postID, err := strconv.ParseUint(params["postID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -116,7 +116,7 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	postID, err := strconv.ParseUint(params["publicacaoId"], 10, 64)
+	postID, err := strconv.ParseUint(params["postID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -173,7 +173,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	postID, err := strconv.ParseUint(params["publicacaoId"], 10, 64)
+	postID, err := strconv.ParseUint(params["postID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -207,7 +207,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 
 func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -232,7 +232,7 @@ func GetPostsByUser(w http.ResponseWriter, r *http.Request) {
 
 func LikePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	postID, err := strconv.ParseUint(params["publicacaoId"], 10, 64)
+	postID, err := strconv.ParseUint(params["postID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -256,7 +256,7 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 
 func DislikePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	postID, err := strconv.ParseUint(params["publicacaoId"], 10, 64)
+	postID, err := strconv.ParseUint(params["postID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return

@@ -72,7 +72,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 	}
@@ -94,7 +94,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -146,7 +146,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -188,7 +188,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -223,7 +223,7 @@ func StopFollowingUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -252,7 +252,7 @@ func StopFollowingUser(w http.ResponseWriter, r *http.Request) {
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -277,7 +277,7 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 
 func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
@@ -308,7 +308,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	userID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+	userID, err := strconv.ParseUint(params["userID"], 10, 64)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return

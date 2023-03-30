@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"api/src/security"
+	"api/internal/domain/security"
 
 	"github.com/badoux/checkmail"
 )
@@ -26,31 +26,31 @@ func (user *User) Prepare(step string) error {
 		return err
 	}
 
-	if erro := user.format(step); erro != nil {
-		return erro
+	if err := user.format(step); err != nil {
+		return err
 	}
 	return nil
 }
 
 func (user *User) validate(etapa string) error {
 	if user.Name == "" {
-		return errors.New("O nome é obrigatório e não pode estar em branco")
+		return errors.New("The name is required and can't be empty")
 	}
 
 	if user.Nick == "" {
-		return errors.New("O nick é obrigatório e não pode estar em branco")
+		return errors.New("The nick is required and can't be empty")
 	}
 
 	if user.Email == "" {
 
-		return errors.New("O email é obrigatório e não pode estar em branco")
+		return errors.New("The email is required and can't be empty")
 	}
 	if etapa == "cadastro" && user.Password == "" {
-		return errors.New("A senha é obrigatório e não pode estar em branco")
+		return errors.New("The password is required and can't be empty")
 	}
 
 	if erro := checkmail.ValidateFormat(user.Email); erro != nil {
-		return errors.New("O email inserido é inválido")
+		return errors.New("The inserted email is invalid")
 	}
 
 	return nil

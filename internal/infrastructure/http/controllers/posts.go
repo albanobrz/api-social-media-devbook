@@ -1,11 +1,11 @@
 package controllers
 
 import (
+	"api/internal/application/auth"
 	"api/internal/domain/entities"
 	database "api/internal/infrastructure/database"
 	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/responses"
-	"api/src/auth"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -136,7 +136,7 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if postSavedOnDB.AuthorID != userID {
-		responses.Error(w, http.StatusForbidden, errors.New("Não é possível atualizar uma publi que não é sua"))
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible to update other's posts"))
 		return
 	}
 
@@ -193,7 +193,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if postSavedOnDB.AuthorID != userID {
-		responses.Error(w, http.StatusForbidden, errors.New("Não é possível deletar uma publi que não é sua"))
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible deleting other's post"))
 		return
 	}
 

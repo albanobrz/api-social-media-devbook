@@ -27,11 +27,11 @@ func (post *Post) Prepare() error {
 
 func (post *Post) validate() error {
 	if post.Title == "" {
-		return errors.New("O título é obrigatório e não pode estar em branco")
+		return errors.New("The title is required and can't be empty")
 	}
 
 	if post.Content == "" {
-		return errors.New("O contúdo é obrigatório e não pode estar em branco")
+		return errors.New("The content is required and can't be empty")
 	}
 
 	return nil

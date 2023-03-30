@@ -124,7 +124,7 @@ func (repository users) Delete(id uint64) error {
 }
 
 // Busca um usuário por email e retorna seu id e senha com hash
-func (repository users) BuscarPorEmail(email string) (entities.User, error) {
+func (repository users) SearchByEmail(email string) (entities.User, error) {
 	row, err := repository.db.Query("select id, senha from usuarios where email = ?", email)
 	if err != nil {
 		return entities.User{}, err

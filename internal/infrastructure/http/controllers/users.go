@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"api/internal/application/auth"
 	"api/internal/domain/entities"
+	"api/internal/domain/security"
 	database "api/internal/infrastructure/database"
 	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/responses"
-	"api/src/auth"
-	"api/src/security"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -107,7 +107,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userID != userIDOnToken {
-		responses.Error(w, http.StatusForbidden, errors.New("Não é possível alterar outro usuário"))
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible update another user"))
 		return
 	}
 
@@ -159,7 +159,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userID != userIDOnToken {
-		responses.Error(w, http.StatusForbidden, errors.New("Não é possível deletar outro usuário"))
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible deleting another user"))
 		return
 	}
 
@@ -195,7 +195,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if followedID == userID {
-		responses.Error(w, http.StatusForbidden, errors.New("não é possível seguir você mesmo"))
+		responses.Error(w, http.StatusForbidden, errors.New("You can't follow yourself"))
 		return
 	}
 
@@ -230,7 +230,7 @@ func StopFollowingUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if followedID == userID {
-		responses.Error(w, http.StatusForbidden, errors.New("não é possível parar de seguir você mesmo"))
+		responses.Error(w, http.StatusForbidden, errors.New("You can't unfollow yourself"))
 		return
 	}
 
@@ -315,7 +315,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userIDOnToken != userID {
-		responses.Error(w, http.StatusForbidden, errors.New("não é possível atualizar senha que não é a sua"))
+		responses.Error(w, http.StatusForbidden, errors.New("You can't update passwords from another user"))
 		return
 	}
 
@@ -342,7 +342,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = security.VerifyPassword(passwordSavedOnDB, password.Current); err != nil {
-		responses.Error(w, http.StatusUnauthorized, errors.New("a senha atual não condiz com a que está no banco"))
+		responses.Error(w, http.StatusUnauthorized, errors.New("The current password doesn't match"))
 		return
 	}
 

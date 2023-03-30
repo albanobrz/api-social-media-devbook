@@ -13,22 +13,22 @@ import (
 )
 
 // Cria um token com permissões para o usuário
-func CreateToken(usuarioID uint64) (string, error) {
-	permissoes := jwt.MapClaims{}
-	permissoes["authorized"] = true
-	permissoes["exp"] = time.Now().Add(time.Hour * 6).Unix()
-	permissoes["usuarioId"] = usuarioID
+func CreateToken(userID uint64) (string, error) {
+	permissions := jwt.MapClaims{}
+	permissions["authorized"] = true
+	permissions["exp"] = time.Now().Add(time.Hour * 6).Unix()
+	permissions["usuarioId"] = userID
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissoes)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissions)
 	return token.SignedString([]byte(config.SecretKey))
 }
 
 // Verifica se o token passado na requisição é válido
 func ValidateToken(r *http.Request) error {
-	tokenString := extraiToken(r)
-	token, erro := jwt.Parse(tokenString, retornarChaveDeVerificacao)
-	if erro != nil {
-		return erro
+	tokenString := extractToken(r)
+	token, err := jwt.Parse(tokenString, ReturnVerificationKey)
+	if err != nil {
+		return err
 	}
 
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -38,24 +38,24 @@ func ValidateToken(r *http.Request) error {
 }
 
 func GetUserID(r *http.Request) (uint64, error) {
-	tokenString := extraiToken(r)
-	token, err := jwt.Parse(tokenString, retornarChaveDeVerificacao)
+	tokenString := extractToken(r)
+	token, err := jwt.Parse(tokenString, ReturnVerificationKey)
 	if err != nil {
 		return 0, err
 	}
 
-	if permissoes, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		usuarioID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissoes["usuarioId"]), 10, 64)
+	if permissions, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["usuarioId"]), 10, 64)
 		if err != nil {
 			return 0, err
 		}
 
-		return usuarioID, nil
+		return userID, nil
 	}
 	return 0, errors.New("token inválido")
 }
 
-func extraiToken(r *http.Request) string {
+func extractToken(r *http.Request) string {
 	// essa função existe pois o token vem: bearer token...
 	token := r.Header.Get("Authorization")
 
@@ -66,9 +66,9 @@ func extraiToken(r *http.Request) string {
 	return ""
 }
 
-func retornarChaveDeVerificacao(token *jwt.Token) (interface{}, error) {
+func ReturnVerificationKey(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-		return nil, fmt.Errorf("Método de assinatura inesperado! %v", token.Header["alg"])
+		return nil, fmt.Errorf("Unexpected sign method %v", token.Header["alg"])
 	}
 
 	return config.SecretKey, nil

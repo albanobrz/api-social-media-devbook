@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"api/internal/application/auth"
 	"api/internal/domain/entities"
+	"api/internal/domain/security"
 	database "api/internal/infrastructure/database"
 	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/responses"
-	"api/src/auth"
-	"api/src/security"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -32,7 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	repository := repositories.NewUsersRepository(db)
-	userSavedOnDB, err := repository.BuscarPorEmail(user.Email)
+	userSavedOnDB, err := repository.SearchByEmail(user.Email)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return

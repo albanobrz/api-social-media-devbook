@@ -17,7 +17,7 @@ func NewUsersRepository(db *sql.DB) *users {
 
 // Create insere um usuário no banco de dados
 func (repository users) Create(user entities.User) (uint64, error) {
-	statement, err := repository.db.Prepare("insert into usuarios (nome, nick, email, senha) values (?, ?, ?, ?)")
+	statement, err := repository.db.Prepare("insert into users (name, nick, email, password) values (?, ?, ?, ?)")
 	if err != nil {
 		return 0, err
 	}
@@ -41,7 +41,7 @@ func (repository users) Get(nameOrNick string) ([]entities.User, error) {
 	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick) // %nomeOuNick%
 
 	rows, err := repository.db.Query(
-		"select id, nome, nick, email, criadoEm from usuarios where nome LIKE ? or nick LIKE ?", nameOrNick, nameOrNick,
+		"select id, name, nick, email, createdAt from users where name LIKE ? or nick LIKE ?", nameOrNick, nameOrNick,
 	)
 
 	if err != nil {
@@ -73,7 +73,7 @@ func (repository users) Get(nameOrNick string) ([]entities.User, error) {
 // Trás um usuário do banco de dados
 func (repository users) GetByID(id uint64) (entities.User, error) {
 	rows, err := repository.db.Query(
-		"select id, nome, nick, email, criadoEm from usuarios where id = ?", id,
+		"select id, name, nick, email, createdAt from users where id = ?", id,
 	)
 	if err != nil {
 		return entities.User{}, err
@@ -98,7 +98,7 @@ func (repository users) GetByID(id uint64) (entities.User, error) {
 
 // Update altera as informações de um usuário no banco de dados
 func (repository users) Update(id uint64, user entities.User) error {
-	statement, err := repository.db.Prepare("update usuarios set nome = ?, nick = ?, email = ? where id = ?")
+	statement, err := repository.db.Prepare("update users set name = ?, nick = ?, email = ? where id = ?")
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (repository users) Update(id uint64, user entities.User) error {
 // Deleta um usuario do banco de dados
 func (repository users) Delete(id uint64) error {
 	statement, err := repository.db.Query(
-		"delete from usuarios where id = ?", id,
+		"delete from users where id = ?", id,
 	)
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (repository users) Delete(id uint64) error {
 
 // Busca um usuário por email e retorna seu id e senha com hash
 func (repository users) SearchByEmail(email string) (entities.User, error) {
-	row, err := repository.db.Query("select id, senha from usuarios where email = ?", email)
+	row, err := repository.db.Query("select id, password from users where email = ?", email)
 	if err != nil {
 		return entities.User{}, err
 	}
@@ -145,7 +145,7 @@ func (repository users) SearchByEmail(email string) (entities.User, error) {
 // Follow permite que um usuário siga outro
 func (repository users) Follow(userID, followedID uint64) error {
 	// o ignore, não permite que caso já haja a chave primária (combinação dos ids), não dê err... ele simplesmente ignora
-	statement, err := repository.db.Prepare("insert ignore into seguidores (usuario_id, seguidor_id) values (?, ?)")
+	statement, err := repository.db.Prepare("insert ignore into followers (user_id, follower_id) values (?, ?)")
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func (repository users) Follow(userID, followedID uint64) error {
 // Deixar de seguir um usuário
 func (repository users) StopFollow(userID, followedID uint64) error {
 	// o ignore, não permite que caso já haja a chave primária (combinação dos ids), não dê err... ele simplesmente ignora
-	statement, err := repository.db.Prepare("delete from seguidores where usuario_id = ? and seguidor_id = ?")
+	statement, err := repository.db.Prepare("delete from followers where user_id = ? and follower_id = ?")
 	if err != nil {
 		return err
 	}
@@ -174,8 +174,8 @@ func (repository users) StopFollow(userID, followedID uint64) error {
 
 func (repository users) GetFollowers(userID uint64) ([]entities.User, error) {
 	rows, err := repository.db.Query(`
-		select u.id, u.nome, u.nick, u.email, u.criadoEm
-		from usuarios u inner join seguidores s on u.id = s.seguidor_id where s.usuario_id = ?
+		select u.id, u.name, u.nick, u.email, u.createdAt
+		from users u inner join followers s on u.id = s.follower_id where s.user_id = ?
 	`, userID)
 	if err != nil {
 		return nil, err
@@ -202,8 +202,8 @@ func (repository users) GetFollowers(userID uint64) ([]entities.User, error) {
 
 func (repository users) GetFollowing(userID uint64) ([]entities.User, error) {
 	rows, err := repository.db.Query(`
-		select u.id, u.nome, u.nick, u.email, u.criadoEm
-		from usuarios u inner join seguidores s on u.id = s.usuario_id where s.seguidor_id = ?
+		select u.id, u.name, u.nick, u.email, u.createdAt
+		from users u inner join followers s on u.id = s.user_id where s.follower_id = ?
 	`, userID)
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func (repository users) GetFollowing(userID uint64) ([]entities.User, error) {
 }
 
 func (repository users) GetPassword(userID uint64) (string, error) {
-	row, err := repository.db.Query("select senha from usuarios where id = ?", userID)
+	row, err := repository.db.Query("select password from users where id = ?", userID)
 	if err != nil {
 		return "", err
 	}
@@ -246,7 +246,7 @@ func (repository users) GetPassword(userID uint64) (string, error) {
 }
 
 func (repository users) UpdatePassword(userID uint64, password string) error {
-	statement, err := repository.db.Prepare("update usuarios set senha = ? where id = ?")
+	statement, err := repository.db.Prepare("update users set password = ? where id = ?")
 	if err != nil {
 		return err
 	}

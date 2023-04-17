@@ -2,43 +2,43 @@ CREATE DATABASE IF NOT EXISTS devbook;
 USE devbook;
 
 
-DROP TABLE IF EXISTS publicacoes;
-DROP TABLE IF EXISTS seguidores;
-DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS followers;
+DROP TABLE IF EXISTS users;
 
-CREATE TABLE usuarios(
+CREATE TABLE users(
     id int auto_increment primary key,
-    nome varchar(50) not null,
+    name varchar(50) not null,
     nick varchar(50) not null unique,
     email varchar(50) not null unique,
-    senha varchar(100) not null,
-    CriadoEm timestamp default current_timestamp()
+    password varchar(100) not null,
+    CreatedAt timestamp default current_timestamp()
 ) ENGINE=INNODB;
 
-CREATE TABLE seguidores(
-    usuario_id int not null,
-    FOREIGN KEY (usuario_id)
-    REFERENCES usuarios(id)
+CREATE TABLE followers(
+    user_id int not null,
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
     ON DELETE CASCADE,
 
-    seguidor_id int not null,
-    FOREIGN KEY (seguidor_id)
-    REFERENCES usuarios(id)
+    follower_id int not null,
+    FOREIGN KEY (follower_id)
+    REFERENCES users(id)
     ON DELETE CASCADE,
 
-    primary key(usuario_id, seguidor_id)
+    primary key(user_id, follower_id)
 ) ENGINE=INNODB;
 
-CREATE TABLE publicacoes(
+CREATE TABLE posts(
     id int auto_increment primary key,
-    titulo varchar(50) not null,
-    conteudo varchar(300) not null,
+    title varchar(50) not null,
+    content varchar(300) not null,
 
-    autor_id int not null,
-    FOREIGN KEY (autor_id)
-    REFERENCES usuarios(id)
+    author_id int not null,
+    FOREIGN KEY (author_id)
+    REFERENCES users(id)
     ON DELETE CASCADE,
 
-    curtidas int default 0,
-    criadaEm timestamp default current_timestamp
+    likes int default 0,
+    createdAT timestamp default current_timestamp
 ) ENGINE=INNODB;    

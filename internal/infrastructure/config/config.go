@@ -15,7 +15,6 @@ var (
 	SecretKey          []byte
 )
 
-// Carregar vai inicializar as variáveis de ambiente
 func Load() {
 	var err error
 
@@ -28,7 +27,8 @@ func Load() {
 		Port = 9000
 	}
 
-	ConnectionDBString = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+	// ConnectionDBString = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+	ConnectionDBString = fmt.Sprintf("%s:%s@tcp(172.19.0.2:3307)/%s",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),

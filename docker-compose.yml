@@ -11,7 +11,7 @@ services:
       - 3000:3000
     volumes:
       - .:/usr/src/app
-    command: go run cmd/main.go
+    command: air cmd/main.go
     networks:
       - main-network
     depends_on:

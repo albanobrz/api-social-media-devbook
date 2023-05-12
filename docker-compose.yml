@@ -16,6 +16,7 @@ services:
       - main-network
     depends_on:
       - db
+      - mongo
 
   db:
     env_file:
@@ -34,7 +35,22 @@ services:
       - "3307:3306"
     networks:
       - main-network
-
+    
+  mongo:
+    env_file:
+      - .env
+    container_name: mongo
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./data:/data/db
+    networks:
+      - main-network
 
 networks:
   main-network:

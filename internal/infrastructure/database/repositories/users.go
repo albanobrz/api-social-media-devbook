@@ -2,8 +2,12 @@ package repositories
 
 import (
 	"api/internal/domain/entities"
+	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type users struct {
@@ -13,6 +17,17 @@ type users struct {
 // NewUsersRepository cria um repositório de usuários
 func NewUsersRepository(db *sql.DB) *users {
 	return &users{db}
+}
+
+type UsersRepositoryMongo struct {
+	collection *mongo.Collection
+}
+
+func NewUsersRepositoryMongo(db *mongo.Database) *UsersRepositoryMongo {
+	collection := db.Collection("users")
+	return &UsersRepositoryMongo{
+		collection,
+	}
 }
 
 // Create insere um usuário no banco de dados
@@ -258,4 +273,20 @@ func (repository users) UpdatePassword(userID uint64, password string) error {
 	return nil
 }
 
-// o repositório simplesmente recebe um dado e altera o banco
+func (repository *UsersRepositoryMongo) CreateMongo(name string, nick string, email string, password string) (entities.User, error) {
+	newUser := entities.User{
+		ID:        1,
+		Name:      name,
+		Nick:      nick,
+		Email:     email,
+		Password:  password,
+		CreatedAt: time.Now(),
+	}
+
+	_, err := repository.collection.InsertOne(context.Background(), newUser)
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	return newUser, nil
+}

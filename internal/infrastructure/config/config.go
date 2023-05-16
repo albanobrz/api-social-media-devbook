@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	ConnectionDBString = ""
-	Port               = 0
-	SecretKey          []byte
+	ConnectionDBString      = ""
+	ConnectionDBStringMongo = ""
+	Port                    = 0
+	SecretKey               []byte
 )
 
 func Load() {
@@ -35,6 +36,13 @@ func Load() {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 	)
+
+	ConnectionDBStringMongo := fmt.Sprintf("mongodb://%s:%s@172.19.0.3:27017/",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+	)
+
+	// fmt.Println(ConnectionDBStringMongo)
 
 	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 }

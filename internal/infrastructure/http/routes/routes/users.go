@@ -66,4 +66,10 @@ var userRoutes = []Route{
 		Function:     controllers.UpdatePassword,
 		RequiresAuth: true,
 	},
+	{
+		URI:          "/users/mongo",
+		Method:       http.MethodPost,
+		Function:     controllers.CreateMongoUser,
+		RequiresAuth: false,
+	},
 }

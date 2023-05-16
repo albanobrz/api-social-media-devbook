@@ -12,12 +12,12 @@ import (
 
 // Usuario representa um usuário utilizando a rede social
 type User struct {
-	ID        uint64    `json:"id,omitempty"`
-	Name      string    `json:"name,omitempty"`
-	Nick      string    `json:"nick,omitempty"`
-	Email     string    `json:"email,omitempty"`
-	Password  string    `json:"password,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	ID        uint64    `json:"id,omitempty" bson:"id"`
+	Name      string    `json:"name,omitempty" bson:"name"`
+	Nick      string    `json:"nick,omitempty" bson:"nick"`
+	Email     string    `json:"email,omitempty" bson:"email"`
+	Password  string    `json:"password,omitempty" bson:"password"`
+	CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt"`
 }
 
 // Prepare vai chamar os métodos para validar e formatar os usuário recebidos

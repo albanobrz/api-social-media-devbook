@@ -2,9 +2,13 @@ package database
 
 import (
 	"api/internal/infrastructure/config"
+	"context"
 	"database/sql"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Abre a conexão com o banco de dados
@@ -20,4 +24,22 @@ func Connect() (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func ConnectMongo() (*mongo.Database, error) {
+	ctx := context.Background()
+
+	clientOptions := options.Client().ApplyURI(config.ConnectionDBStringMongo)
+
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Database(os.Getenv("DB_NAME")), nil
 }

@@ -9,6 +9,7 @@ import (
 	"api/internal/infrastructure/http/responses"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -358,4 +359,40 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(w, http.StatusNoContent, nil)
+}
+
+func CreateMongoUser(w http.ResponseWriter, r *http.Request) {
+	reqbody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var user entities.User
+	if err = json.Unmarshal(reqbody, &user); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := user.Prepare("cadastro"); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	userMongo, err := repository.CreateMongo("teste", "teste", "teste@gmail.com", "teste")
+	// user.ID, err = repository.CreateMongo(user.Name, user.Nick, user.Email, user.Password)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	fmt.Println(userMongo, "caraio")
+
+	responses.JSON(w, http.StatusCreated, user)
 }

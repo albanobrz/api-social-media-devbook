@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Abre a conexão com o banco de dados
 func Connect() (*sql.DB, error) {
 	db, err := sql.Open("mysql", config.ConnectionDBString)
 	if err != nil {
@@ -29,7 +28,7 @@ func Connect() (*sql.DB, error) {
 func ConnectMongo() (*mongo.Database, error) {
 	ctx := context.Background()
 
-	clientOptions := options.Client().ApplyURI(config.ConnectionDBStringMongo)
+	clientOptions := options.Client().ApplyURI(os.Getenv("DB_MONGO_URI"))
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {

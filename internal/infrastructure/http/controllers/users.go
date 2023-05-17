@@ -387,7 +387,6 @@ func CreateMongoUser(w http.ResponseWriter, r *http.Request) {
 
 	repository := repositories.NewUsersRepositoryMongo(db)
 	userMongo, err := repository.CreateMongo("teste", "teste", "teste@gmail.com", "teste")
-	// user.ID, err = repository.CreateMongo(user.Name, user.Nick, user.Email, user.Password)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return

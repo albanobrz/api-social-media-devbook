@@ -9,7 +9,6 @@ import (
 	"api/internal/infrastructure/http/responses"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -386,12 +385,29 @@ func CreateMongoUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	repository := repositories.NewUsersRepositoryMongo(db)
-	userMongo, err := repository.CreateMongo("teste", "teste", "teste@gmail.com", "teste")
+	newUser, err := repository.CreateMongo(user)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	fmt.Println(userMongo, "caraio")
 
-	responses.JSON(w, http.StatusCreated, user)
+	responses.JSON(w, http.StatusCreated, newUser)
 }
+
+// func GetUsersMongo(w http.ResponseWriter, r *http.Request) {
+// 	nameOrNick := strings.ToLower(r.URL.Query().Get("usuario"))
+
+// 	db, err := database.Connect()
+// 	if err != nil {
+// 		responses.Error(w, http.StatusInternalServerError, err)
+// 	}
+// 	defer db.Close()
+
+// 	repository := repositories.NewUsersRepository(db)
+// 	users, err := repository.Get(nameOrNick)
+// 	if err != nil {
+// 		responses.Error(w, http.StatusInternalServerError, err)
+// 	}
+
+// 	responses.JSON(w, http.StatusOK, users)
+// }

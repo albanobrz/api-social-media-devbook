@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -30,11 +29,7 @@ func Load() {
 	// local mysql connection:
 	// ConnectionDBString = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 	// container db connection:
-	ConnectionDBString = fmt.Sprintf("%s:%s@tcp(172.19.0.3:3306)/%s?charset=utf8&parseTime=True&loc=Local",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-	)
+	ConnectionDBString = os.Getenv("DB_MYSQL_URI")
 
 	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 }

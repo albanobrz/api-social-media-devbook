@@ -4,10 +4,12 @@ import (
 	"api/internal/domain/entities"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type users struct {
@@ -273,17 +275,29 @@ func (repository users) UpdatePassword(userID uint64, password string) error {
 	return nil
 }
 
-func (repository *UsersRepositoryMongo) CreateMongo(name string, nick string, email string, password string) (entities.User, error) {
+func (repository *UsersRepositoryMongo) CreateMongo(user entities.User) (entities.User, error) {
+	filter := bson.M{"email": user.Email}
+	existingUser := entities.User{}
+	err := repository.collection.FindOne(context.Background(), filter).Decode(&existingUser)
+	if err == nil {
+		return entities.User{}, errors.New("Já existe um usuário com o mesmo email")
+	}
+
+	filter = bson.M{"nick": user.Nick}
+	err = repository.collection.FindOne(context.Background(), filter).Decode(&existingUser)
+	if err == nil {
+		return entities.User{}, errors.New("Já existe um usuário com o mesmo nick")
+	}
+
 	newUser := entities.User{
-		ID:        1,
-		Name:      name,
-		Nick:      nick,
-		Email:     email,
-		Password:  password,
+		Name:      user.Name,
+		Nick:      user.Nick,
+		Email:     user.Email,
+		Password:  user.Password,
 		CreatedAt: time.Now(),
 	}
 
-	_, err := repository.collection.InsertOne(context.Background(), newUser)
+	_, err = repository.collection.InsertOne(context.Background(), newUser)
 	if err != nil {
 		return entities.User{}, err
 	}

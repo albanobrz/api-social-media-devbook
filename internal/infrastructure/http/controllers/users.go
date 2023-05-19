@@ -408,3 +408,70 @@ func GetAllUsersMongo(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusOK, users)
 }
+
+func GetUserMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	nick := params["userID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	user, err := repository.GetUserByNick(nick)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+	}
+
+	responses.JSON(w, http.StatusOK, user)
+}
+
+// func UpdateUserMongo(w http.ResponseWriter, r *http.Request) {
+// 	params := mux.Vars(r)
+// 	userID := params["userID"]
+
+// 	userIDOnToken, err := auth.GetUserID(r)
+// 	if err != nil {
+// 		responses.Error(w, http.StatusUnauthorized, err)
+// 		return
+// 	}
+
+// 	if userID != userIDOnToken {
+// 		responses.Error(w, http.StatusForbidden, errors.New("It's not possible update another user"))
+// 		return
+// 	}
+
+// 	reqbody, err := ioutil.ReadAll(r.Body)
+// 	if err != nil {
+// 		responses.Error(w, http.StatusUnprocessableEntity, err)
+// 		return
+// 	}
+
+// 	var user entities.User
+// 	if err = json.Unmarshal(reqbody, &user); err != nil {
+// 		responses.Error(w, http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	if err = user.Prepare("edicao"); err != nil {
+// 		responses.Error(w, http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	db, err := database.Connect()
+// 	if err != nil {
+// 		responses.Error(w, http.StatusInternalServerError, err)
+// 		return
+// 	}
+// 	defer db.Close()
+
+// 	repository := repositories.NewUsersRepository(db)
+// 	if err = repository.Update(userID, user); err != nil {
+// 		responses.Error(w, http.StatusInternalServerError, err)
+// 		return
+// 	}
+
+// 	responses.JSON(w, http.StatusNoContent, nil)
+// }

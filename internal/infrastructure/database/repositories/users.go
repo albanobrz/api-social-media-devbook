@@ -319,7 +319,7 @@ func (repository *UsersRepositoryMongo) SearchByEmailMongo(email string) (entiti
 }
 
 func (repository *UsersRepositoryMongo) GetAllUsersMongo() ([]entities.User, error) {
-	cursor, err := repository.collection.Find(context.Background(), bson.M{}, options.Find().SetProjection(bson.M{"password": 0, "email": 0}))
+	cursor, err := repository.collection.Find(context.Background(), bson.M{}, options.Find().SetProjection(bson.M{"password": 0}))
 	if err != nil {
 		return nil, err
 	}
@@ -336,4 +336,22 @@ func (repository *UsersRepositoryMongo) GetAllUsersMongo() ([]entities.User, err
 	}
 
 	return users, nil
+}
+
+func (repository *UsersRepositoryMongo) GetUserByNick(nick string) (entities.User, error) {
+	filter := bson.M{"nick": nick}
+	existingUser := entities.User{}
+
+	options := options.FindOne().SetProjection(bson.M{"password": 0})
+
+	err := repository.collection.FindOne(context.Background(), filter, options).Decode(&existingUser)
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	return existingUser, nil
+}
+
+func (repository *UsersRepositoryMongo) UpdateUserMongo(nick string) (entities.User, error) {
+	return entities.User{}, nil
 }

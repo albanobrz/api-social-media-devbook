@@ -55,6 +55,24 @@ func GetUserID(r *http.Request) (uint64, error) {
 	return 0, errors.New("Invalid token")
 }
 
+func GetUserNick(r *http.Request) (uint64, error) {
+	tokenString := extractToken(r)
+	token, err := jwt.Parse(tokenString, ReturnVerificationKey)
+	if err != nil {
+		return 0, err
+	}
+
+	if permissions, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["userID"]), 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		return userID, nil
+	}
+	return 0, errors.New("Invalid token")
+}
+
 func extractToken(r *http.Request) string {
 	// essa função existe pois o token vem: bearer token...
 	token := r.Header.Get("Authorization")

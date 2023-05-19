@@ -72,10 +72,10 @@ var userRoutes = []Route{
 		Function:     controllers.CreateMongoUser,
 		RequiresAuth: false,
 	},
-	// {
-	// 	URI:          "/mongo/users/",
-	// 	Method:       http.MethodGet,
-	// 	Function:     controllers.GetUsersMongo,
-	// 	RequiresAuth: true,
-	// },
+	{
+		URI:          "/mongo/users/",
+		Method:       http.MethodGet,
+		Function:     controllers.GetAllUsersMongo,
+		RequiresAuth: true,
+	},
 }

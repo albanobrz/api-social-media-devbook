@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -303,4 +304,36 @@ func (repository *UsersRepositoryMongo) CreateMongo(user entities.User) (entitie
 	}
 
 	return newUser, nil
+}
+
+func (repository *UsersRepositoryMongo) SearchByEmailMongo(email string) (entities.User, error) {
+	filter := bson.M{"email": email}
+	existingUser := entities.User{}
+
+	err := repository.collection.FindOne(context.Background(), filter).Decode(&existingUser)
+	if err != nil {
+		return entities.User{}, err
+	}
+
+	return existingUser, nil
+}
+
+func (repository *UsersRepositoryMongo) GetAllUsersMongo() ([]entities.User, error) {
+	cursor, err := repository.collection.Find(context.Background(), bson.M{}, options.Find().SetProjection(bson.M{"password": 0, "email": 0}))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var users []entities.User
+
+	for cursor.Next(context.Background()) {
+		var user entities.User
+		if err := cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }

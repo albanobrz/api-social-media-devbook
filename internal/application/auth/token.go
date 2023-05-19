@@ -23,6 +23,16 @@ func CreateToken(userID uint64) (string, error) {
 	return token.SignedString([]byte(config.SecretKey))
 }
 
+func CreateTokenWithNick(userNick string) (string, error) {
+	permissions := jwt.MapClaims{}
+	permissions["authorized"] = true
+	permissions["exp"] = time.Now().Add(time.Hour * 6).Unix()
+	permissions["userID"] = userNick
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissions)
+	return token.SignedString([]byte(config.SecretKey))
+}
+
 // Verifica se o token passado na requisição é válido
 func ValidateToken(r *http.Request) error {
 	tokenString := extractToken(r)
@@ -55,22 +65,22 @@ func GetUserID(r *http.Request) (uint64, error) {
 	return 0, errors.New("Invalid token")
 }
 
-func GetUserNick(r *http.Request) (uint64, error) {
+func GetUserNick(r *http.Request) (string, error) {
 	tokenString := extractToken(r)
 	token, err := jwt.Parse(tokenString, ReturnVerificationKey)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	if permissions, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["userID"]), 10, 64)
+		userID := fmt.Sprintf("%s", permissions["userID"])
 		if err != nil {
-			return 0, err
+			return "", err
 		}
 
 		return userID, nil
 	}
-	return 0, errors.New("Invalid token")
+	return "", errors.New("Invalid token")
 }
 
 func extractToken(r *http.Request) string {

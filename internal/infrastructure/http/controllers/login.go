@@ -83,7 +83,7 @@ func LoginMongo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.CreateToken(userSavedOnDB.ID)
+	token, err := auth.CreateTokenWithNick(userSavedOnDB.Nick)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return

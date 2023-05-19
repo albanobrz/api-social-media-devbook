@@ -352,6 +352,23 @@ func (repository *UsersRepositoryMongo) GetUserByNick(nick string) (entities.Use
 	return existingUser, nil
 }
 
-func (repository *UsersRepositoryMongo) UpdateUserMongo(nick string) (entities.User, error) {
-	return entities.User{}, nil
+func (repository *UsersRepositoryMongo) UpdateUserMongo(nick string, user entities.User) error {
+	// userToUpdate, err := repository.GetUserByNick(nick)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// TODO: the function is not working properly
+	filter := bson.M{"nick": nick}
+
+	update := bson.M{
+		"$set": bson.M{"name": user.Name, "nick": user.Nick, "email": user.Email},
+	}
+
+	_, err := repository.collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -18,6 +18,7 @@ type User struct {
 	Email     string    `json:"email,omitempty" bson:"email"`
 	Password  string    `json:"password,omitempty" bson:"password"`
 	CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty" bson:"updatedAt"`
 }
 
 // Prepare vai chamar os métodos para validar e formatar os usuário recebidos
@@ -32,7 +33,7 @@ func (user *User) Prepare(step string) error {
 	return nil
 }
 
-func (user *User) validate(etapa string) error {
+func (user *User) validate(step string) error {
 	if user.Name == "" {
 		return errors.New("The name is required and can't be empty")
 	}
@@ -45,11 +46,11 @@ func (user *User) validate(etapa string) error {
 
 		return errors.New("The email is required and can't be empty")
 	}
-	if etapa == "cadastro" && user.Password == "" {
+	if step == "createUser" && user.Password == "" {
 		return errors.New("The password is required and can't be empty")
 	}
 
-	if erro := checkmail.ValidateFormat(user.Email); erro != nil {
+	if err := checkmail.ValidateFormat(user.Email); err != nil {
 		return errors.New("The inserted email is invalid")
 	}
 
@@ -61,13 +62,13 @@ func (user *User) format(step string) error {
 	user.Nick = strings.TrimSpace(user.Nick)
 	user.Email = strings.TrimSpace(user.Email)
 
-	if step == "cadastro" {
-		senhaHash, err := security.Hash(user.Password)
+	if step == "createUser" {
+		passwordHash, err := security.Hash(user.Password)
 		if err != nil {
 			return err
 		}
 
-		user.Password = string(senhaHash)
+		user.Password = string(passwordHash)
 	}
 	return nil
 }

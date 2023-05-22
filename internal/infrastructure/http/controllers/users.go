@@ -160,7 +160,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userID != userIDOnToken {
-		responses.Error(w, http.StatusForbidden, errors.New("It's not possible deleting another user"))
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible delete another user"))
 		return
 	}
 
@@ -471,6 +471,36 @@ func UpdateUserMongo(w http.ResponseWriter, r *http.Request) {
 
 	repository := repositories.NewUsersRepositoryMongo(db)
 	if err = repository.UpdateUserMongo(nick, user); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}
+
+func DeleteUserMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID := params["userID"]
+
+	userNickOnToken, err := auth.GetUserNick(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userID != userNickOnToken {
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible delete another user"))
+		return
+	}
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	if err = repository.DeleteUserMongo(userID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}

@@ -90,4 +90,10 @@ var userRoutes = []Route{
 		Function:     controllers.UpdateUserMongo,
 		RequiresAuth: true,
 	},
+	{
+		URI:          "/mongo/users/{userID}",
+		Method:       http.MethodDelete,
+		Function:     controllers.DeleteUserMongo,
+		RequiresAuth: true,
+	},
 }

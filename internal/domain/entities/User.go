@@ -19,6 +19,8 @@ type User struct {
 	Password  string    `json:"password,omitempty" bson:"password"`
 	CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty" bson:"updatedAt"`
+	Followers []string  `json:"followers" bson:"followers"`
+	Following []string  `json:"following" bson:"following"`
 }
 
 // Prepare vai chamar os métodos para validar e formatar os usuário recebidos

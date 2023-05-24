@@ -507,3 +507,63 @@ func DeleteUserMongo(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusNoContent, nil)
 }
+
+func FollowUserMongo(w http.ResponseWriter, r *http.Request) {
+	followerID, err := auth.GetUserNick(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	followedID := params["userID"]
+
+	if followerID == followedID {
+		responses.Error(w, http.StatusForbidden, errors.New("You can't follow yourself"))
+		return
+	}
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	if err = repository.FollowMongo(followerID, followedID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}
+
+func UnfollowUserMongo(w http.ResponseWriter, r *http.Request) {
+	unfollowerID, err := auth.GetUserNick(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	unfollowedID := params["userID"]
+
+	if unfollowerID == unfollowedID {
+		responses.Error(w, http.StatusForbidden, errors.New("You can't unfollow yourself"))
+		return
+	}
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	if err = repository.UnfollowMongo(unfollowerID, unfollowedID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}

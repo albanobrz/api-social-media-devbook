@@ -96,4 +96,16 @@ var userRoutes = []Route{
 		Function:     controllers.DeleteUserMongo,
 		RequiresAuth: true,
 	},
+	{
+		URI:          "/mongo/users/{userID}/follow",
+		Method:       http.MethodPost,
+		Function:     controllers.FollowUserMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/users/{userID}/unfollow",
+		Method:       http.MethodDelete,
+		Function:     controllers.UnfollowUserMongo,
+		RequiresAuth: true,
+	},
 }

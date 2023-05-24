@@ -296,6 +296,8 @@ func (repository *UsersRepositoryMongo) CreateMongo(user entities.User) (entitie
 		Email:     user.Email,
 		Password:  user.Password,
 		CreatedAt: time.Now(),
+		Followers: []string{},
+		Following: []string{},
 	}
 
 	_, err = repository.collection.InsertOne(context.Background(), newUser)
@@ -371,6 +373,89 @@ func (repository *UsersRepositoryMongo) DeleteUserMongo(nick string) error {
 	filter := bson.M{"nick": nick}
 
 	_, err := repository.collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// TODO: migrate the types, from entities to model
+func (repository *UsersRepositoryMongo) FollowMongo(followerID string, followedID string) error {
+	filter := bson.M{
+		"nick":      followerID,
+		"following": bson.M{"$in": []string{followedID}},
+	}
+
+	var result entities.User
+	err := repository.collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err == nil {
+		return fmt.Errorf("You already follow this user")
+	}
+
+	// update follower data
+	filterFollower := bson.M{"nick": followerID}
+	updateFollower := bson.M{
+		"$push": bson.M{
+			"following": followedID,
+		},
+	}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), filterFollower, updateFollower)
+	if err != nil {
+		return err
+	}
+
+	// update followed data
+	filterFollowed := bson.M{"nick": followedID}
+	updateFollowed := bson.M{
+		"$push": bson.M{
+			"followers": followerID,
+		},
+	}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), filterFollowed, updateFollowed)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository *UsersRepositoryMongo) UnfollowMongo(unfollowerID string, unfollowedID string) error {
+	filter := bson.M{
+		"nick":      unfollowerID,
+		"following": bson.M{"$in": []string{unfollowedID}},
+	}
+
+	var result entities.User
+	err := repository.collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return fmt.Errorf("You don't follow this user already")
+	}
+
+	// update follower data
+	filterFollower := bson.M{"nick": unfollowerID}
+	updateFollower := bson.M{
+		"$pull": bson.M{
+			"following": unfollowedID,
+		},
+	}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), filterFollower, updateFollower)
+	if err != nil {
+		return err
+	}
+
+	// update followed data
+	filterFollowed := bson.M{"nick": unfollowedID}
+	updateFollowed := bson.M{
+		"$pull": bson.M{
+			"followers": unfollowerID,
+		},
+	}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), filterFollowed, updateFollowed)
 	if err != nil {
 		return err
 	}

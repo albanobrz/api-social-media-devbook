@@ -462,3 +462,59 @@ func (repository *UsersRepositoryMongo) UnfollowMongo(unfollowerID string, unfol
 
 	return nil
 }
+
+func (repository *UsersRepositoryMongo) GetFollowersMongo(userID string) ([]string, error) {
+	filter := bson.M{"nick": userID}
+
+	var followers []string
+	cursor, err := repository.collection.Find(context.TODO(), filter)
+	if err != nil {
+		return []string{}, err
+	}
+
+	for cursor.Next(context.TODO()) {
+		var result entities.User
+		err := cursor.Decode(&result)
+		if err != nil {
+			return []string{}, err
+		}
+
+		followers = append(followers, result.Followers...)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return []string{}, err
+	}
+
+	cursor.Close(context.TODO())
+
+	return followers, nil
+}
+
+func (repository *UsersRepositoryMongo) GetFollowingMongo(userID string) ([]string, error) {
+	filter := bson.M{"nick": userID}
+
+	var following []string
+	cursor, err := repository.collection.Find(context.TODO(), filter)
+	if err != nil {
+		return []string{}, err
+	}
+
+	for cursor.Next(context.TODO()) {
+		var result entities.User
+		err := cursor.Decode(&result)
+		if err != nil {
+			return []string{}, err
+		}
+
+		following = append(following, result.Following...)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return []string{}, err
+	}
+
+	cursor.Close(context.TODO())
+
+	return following, nil
+}

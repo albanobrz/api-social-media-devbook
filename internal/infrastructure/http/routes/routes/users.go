@@ -108,4 +108,16 @@ var userRoutes = []Route{
 		Function:     controllers.UnfollowUserMongo,
 		RequiresAuth: true,
 	},
+	{
+		URI:          "/mongo/users/{userID}/followers",
+		Method:       http.MethodGet,
+		Function:     controllers.GetFollowersMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/users/{userID}/following",
+		Method:       http.MethodGet,
+		Function:     controllers.GetFollowingMongo,
+		RequiresAuth: true,
+	},
 }

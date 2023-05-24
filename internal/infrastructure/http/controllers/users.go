@@ -567,3 +567,43 @@ func UnfollowUserMongo(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusNoContent, nil)
 }
+
+func GetFollowersMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID := params["userID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	followers, err := repository.GetFollowersMongo(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, followers)
+}
+
+func GetFollowingMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userID := params["userID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	following, err := repository.GetFollowingMongo(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, following)
+}

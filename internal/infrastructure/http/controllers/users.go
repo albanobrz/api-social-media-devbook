@@ -607,3 +607,62 @@ func GetFollowingMongo(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusOK, following)
 }
+
+func UpdatePasswordMongo(w http.ResponseWriter, r *http.Request) {
+	userNickOnToken, err := auth.GetUserNick(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	userNick := params["userID"]
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if userNickOnToken != userNick {
+		responses.Error(w, http.StatusForbidden, errors.New("You can't update passwords from another user"))
+		return
+	}
+
+	reqbody, err := ioutil.ReadAll(r.Body)
+
+	var password entities.Password
+	if err = json.Unmarshal(reqbody, &password); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewUsersRepositoryMongo(db)
+	passwordSavedOnDB, err := repository.GetPasswordMongo(userNick)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err = security.VerifyPassword(passwordSavedOnDB, password.Current); err != nil {
+		responses.Error(w, http.StatusUnauthorized, errors.New("The current password doesn't match"))
+		return
+	}
+
+	HashedPassword, err := security.Hash(password.New)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = repository.UpdatePasswordMongo(userNick, string(HashedPassword)); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}

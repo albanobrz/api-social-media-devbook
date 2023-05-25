@@ -120,4 +120,10 @@ var userRoutes = []Route{
 		Function:     controllers.GetFollowingMongo,
 		RequiresAuth: true,
 	},
+	{
+		URI:          "/mongo/users/{userID}/update-password",
+		Method:       http.MethodPost,
+		Function:     controllers.UpdatePasswordMongo,
+		RequiresAuth: true,
+	},
 }

@@ -518,3 +518,34 @@ func (repository *UsersRepositoryMongo) GetFollowingMongo(userID string) ([]stri
 
 	return following, nil
 }
+
+func (repository *UsersRepositoryMongo) GetPasswordMongo(nick string) (string, error) {
+	filter := bson.M{"nick": nick}
+	existingUser := entities.User{}
+
+	err := repository.collection.FindOne(context.Background(), filter).Decode(&existingUser)
+	if err != nil {
+		return "", err
+	}
+
+	return existingUser.Password, nil
+}
+
+func (repository *UsersRepositoryMongo) UpdatePasswordMongo(nick string, password string) error {
+	filter := bson.M{
+		"nick": nick,
+	}
+	updatePassword := bson.M{
+		"$set": bson.M{
+			"password":  password,
+			"updatedAt": time.Now(),
+		},
+	}
+
+	_, err := repository.collection.UpdateOne(context.TODO(), filter, updatePassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

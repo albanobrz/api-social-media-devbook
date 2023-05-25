@@ -10,10 +10,11 @@ type Post struct {
 	ID         uint64    `json:"id,omitempty" bson:"id"`
 	Title      string    `json:"title,omitempty" bson:"title"`
 	Content    string    `json:"content,omitempty" bson:"content"`
-	AuthorID   uint64    `json:"authorId,omitempty" bson:"authorId"`
+	AuthorID   string    `json:"authorId,omitempty" bson:"authorId"`
 	AuthorNick string    `json:"authorNick,omitempty" bson:"authorNick"`
 	Likes      uint64    `json:"likes" bson:"likes"`
 	CreatedAt  time.Time `json:"createdAt,omitempty" bson:"createdAt"`
+	UpdatedAt  time.Time `json:"udpatedAt,omitempty" bson:"udpatedAt"`
 }
 
 func (post *Post) Prepare() error {

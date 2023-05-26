@@ -7,8 +7,11 @@ import (
 	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/responses"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // func CreatePost(w http.ResponseWriter, r *http.Request) {
@@ -317,11 +320,8 @@ func CreatePostMongo(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPostsMongo(w http.ResponseWriter, r *http.Request) {
-	userNick, err := auth.GetUserNick(r)
-	if err != nil {
-		responses.Error(w, http.StatusUnauthorized, err)
-		return
-	}
+	params := mux.Vars(r)
+	userNick := params["userID"]
 
 	db, err := database.ConnectMongo()
 	if err != nil {
@@ -331,6 +331,130 @@ func GetPostsMongo(w http.ResponseWriter, r *http.Request) {
 
 	repository := repositories.NewPostsRepositoryMongo(db)
 	posts, err := repository.GetPostsMongo(userNick)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, posts)
+}
+
+func UpdatePostMongo(w http.ResponseWriter, r *http.Request) {
+	userNick, err := auth.GetUserNick(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	postID := params["postID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostsRepositoryMongo(db)
+	postSavedOnDB, err := repository.GetPostWithIdMongo(postID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	if postSavedOnDB.AuthorNick != userNick {
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible to update other's posts"))
+		return
+	}
+
+	reqbody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var post entities.Post
+	if err = json.Unmarshal(reqbody, &post); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = post.Prepare(); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = repository.UpdatePostMongo(postID, post); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}
+
+func DeletePostMongo(w http.ResponseWriter, r *http.Request) {
+	userNick, err := auth.GetUserNick(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	postID := params["postID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostsRepositoryMongo(db)
+	postSavedOnDB, err := repository.GetPostWithIdMongo(postID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	if postSavedOnDB.AuthorNick != userNick {
+		responses.Error(w, http.StatusForbidden, errors.New("It's not possible deleting other's post"))
+		return
+	}
+
+	if err = repository.DeletePostMongo(postID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
+}
+
+func GetPostMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postID := params["postID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostsRepositoryMongo(db)
+	post, err := repository.GetPostWithIdMongo(postID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, post)
+}
+
+func GetAllPostsMongo(w http.ResponseWriter, r *http.Request) {
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostsRepositoryMongo(db)
+	posts, err := repository.GetAllPostsMongo()
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return

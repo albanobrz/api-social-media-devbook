@@ -61,9 +61,33 @@ var PostsRoutes = []Route{
 		RequiresAuth: true,
 	},
 	{
-		URI:          "/posts",
+		URI:          "/mongo/posts/{userID}",
 		Method:       http.MethodGet,
 		Function:     controllers.GetPostsMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/posts/{postID}",
+		Method:       http.MethodPut,
+		Function:     controllers.UpdatePostMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/posts/{postID}",
+		Method:       http.MethodDelete,
+		Function:     controllers.DeletePostMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/posts/specific/{postID}",
+		Method:       http.MethodGet,
+		Function:     controllers.GetPostMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/posts",
+		Method:       http.MethodGet,
+		Function:     controllers.GetAllPostsMongo,
 		RequiresAuth: true,
 	},
 }

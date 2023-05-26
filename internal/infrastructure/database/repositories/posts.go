@@ -4,8 +4,10 @@ import (
 	"api/internal/domain/entities"
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -250,4 +252,75 @@ func (repository *PostsRepositoryMongo) GetPostsMongo(nick string) ([]entities.P
 	}
 
 	return results, nil
+}
+
+func (repository *PostsRepositoryMongo) GetPostWithIdMongo(id string) (entities.Post, error) {
+	idString, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return entities.Post{}, err
+	}
+
+	filter := bson.M{"_id": idString}
+
+	var result entities.Post
+	err = repository.collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return entities.Post{}, fmt.Errorf("This post doens't exists")
+	}
+
+	return result, nil
+}
+
+func (repository *PostsRepositoryMongo) UpdatePostMongo(postID string, updatedPost entities.Post) error {
+	idString, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": idString}
+
+	update := bson.M{"$set": bson.M{"title": updatedPost.Title, "content": updatedPost.Content, "updatedAt": time.Now()}}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository *PostsRepositoryMongo) DeletePostMongo(postID string) error {
+	idString, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": idString}
+
+	_, err = repository.collection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository *PostsRepositoryMongo) GetAllPostsMongo() ([]entities.Post, error) {
+	cursor, err := repository.collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var posts []entities.Post
+
+	for cursor.Next(context.Background()) {
+		var post entities.Post
+		if err := cursor.Decode(&post); err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
 }

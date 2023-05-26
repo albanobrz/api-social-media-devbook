@@ -14,7 +14,7 @@ type Post struct {
 	AuthorNick string    `json:"authorNick,omitempty" bson:"authorNick"`
 	Likes      uint64    `json:"likes" bson:"likes"`
 	CreatedAt  time.Time `json:"createdAt,omitempty" bson:"createdAt"`
-	UpdatedAt  time.Time `json:"udpatedAt,omitempty" bson:"udpatedAt"`
+	UpdatedAt  time.Time `json:"updatedAt,omitempty" bson:"updatedAt"`
 }
 
 func (post *Post) Prepare() error {

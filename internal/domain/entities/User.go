@@ -10,7 +10,6 @@ import (
 	"github.com/badoux/checkmail"
 )
 
-// Usuario representa um usuário utilizando a rede social
 type User struct {
 	ID        uint64    `json:"id,omitempty" bson:"id"`
 	Name      string    `json:"name,omitempty" bson:"name"`
@@ -23,7 +22,6 @@ type User struct {
 	Following []string  `json:"following" bson:"following"`
 }
 
-// Prepare vai chamar os métodos para validar e formatar os usuário recebidos
 func (user *User) Prepare(step string) error {
 	if err := user.validate(step); err != nil {
 		return err

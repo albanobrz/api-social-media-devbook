@@ -8,6 +8,6 @@ import (
 var LoginRoutes = Route{
 	URI:          "/login",
 	Method:       http.MethodPost,
-	Function:     controllers.LoginMongo,
+	Function:     controllers.Login,
 	RequiresAuth: false,
 }

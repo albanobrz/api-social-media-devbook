@@ -1,9 +1,7 @@
 package database
 
 import (
-	"api/internal/infrastructure/config"
 	"context"
-	"database/sql"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -11,21 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect() (*sql.DB, error) {
-	db, err := sql.Open("mysql", config.ConnectionDBString)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = db.Ping(); err != nil {
-		db.Close()
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func ConnectMongo() (*mongo.Database, error) {
+func Connect() (*mongo.Database, error) {
 	ctx := context.Background()
 
 	clientOptions := options.Client().ApplyURI(os.Getenv("DB_MONGO_URI"))

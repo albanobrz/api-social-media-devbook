@@ -3,7 +3,6 @@ package repositories
 import (
 	"api/internal/domain/entities"
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -12,204 +11,18 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type Posts struct {
-	db *sql.DB
-}
-
-func NewPostsRepository(db *sql.DB) *Posts {
-	return &Posts{db}
-}
-
-type PostsRepositoryMongo struct {
+type PostsRepository struct {
 	collection *mongo.Collection
 }
 
-func NewPostsRepositoryMongo(db *mongo.Database) *PostsRepositoryMongo {
+func NewPostsRepository(db *mongo.Database) *PostsRepository {
 	collection := db.Collection("posts")
-	return &PostsRepositoryMongo{
+	return &PostsRepository{
 		collection,
 	}
 }
 
-// func (repository Posts) Create(post entities.Post) (uint64, error) {
-// 	statement, err := repository.db.Prepare("insert into posts (title, content, author_id) values (?, ?, ?)")
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	defer statement.Close()
-
-// 	result, err := statement.Exec(post.Title, post.Content, post.AuthorID)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	lastInsertID, err := result.LastInsertId()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	return uint64(lastInsertID), nil
-// }
-
-// func (repository Posts) GetWithID(postID uint64) (entities.Post, error) {
-// 	row, err := repository.db.Query(`
-// 		select p.*, u.nick from
-// 		posts p inner join users u
-// 		on u.id = p.author_id where p.id = ?
-// 	`, postID)
-// 	if err != nil {
-// 		return entities.Post{}, err
-// 	}
-
-// 	defer row.Close()
-
-// 	var post entities.Post
-
-// 	if row.Next() {
-// 		if err = row.Scan(
-// 			&post.ID,
-// 			&post.Title,
-// 			&post.Content,
-// 			&post.AuthorID,
-// 			&post.Likes,
-// 			&post.CreatedAt,
-// 			&post.AuthorNick,
-// 		); err != nil {
-// 			return entities.Post{}, err
-// 		}
-// 	}
-
-// 	return post, nil
-// }
-
-// func (repository Posts) Get(userID uint64) ([]entities.Post, error) {
-// 	rows, err := repository.db.Query(`
-// 		select distinct p.*, u.nick from posts p
-// 		inner join users u on u.id = p.author_id
-// 		inner join followers s on p.author_id = s.user_id
-// 		where u.id = ? or s.follower_id = ?
-// 		order by 1 desc
-// 	`, userID, userID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var posts []entities.Post
-
-// 	for rows.Next() {
-// 		var post entities.Post
-// 		if err = rows.Scan(
-// 			&post.ID,
-// 			&post.Title,
-// 			&post.Content,
-// 			&post.AuthorID,
-// 			&post.Likes,
-// 			&post.CreatedAt,
-// 			&post.AuthorNick,
-// 		); err != nil {
-// 			return nil, err
-// 		}
-
-// 		posts = append(posts, post)
-// 	}
-// 	return posts, nil
-// }
-
-// func (repository Posts) Update(postID uint64, post entities.Post) error {
-// 	statement, err := repository.db.Prepare("update posts set title = ?, content = ? where id = ?")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer statement.Close()
-
-// 	if _, err = statement.Exec(post.Title, post.Content, postID); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (repository Posts) Delete(postID uint64) error {
-// 	statement, err := repository.db.Query(
-// 		"delete from posts where id = ?", postID,
-// 	)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer statement.Close()
-
-// 	return nil
-// }
-
-// func (repository Posts) GetByUser(userID uint64) ([]entities.Post, error) {
-// 	rows, err := repository.db.Query(`
-// 		select p.*, u.nick from posts p
-// 		join users u on u.id = p.author_id
-// 		where p.author_id = ?
-// 	`, userID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var posts []entities.Post
-
-// 	for rows.Next() {
-// 		var post entities.Post
-// 		if err = rows.Scan(
-// 			&post.ID,
-// 			&post.Title,
-// 			&post.Content,
-// 			&post.AuthorID,
-// 			&post.Likes,
-// 			&post.CreatedAt,
-// 			&post.AuthorNick,
-// 		); err != nil {
-// 			return nil, err
-// 		}
-
-// 		posts = append(posts, post)
-// 	}
-// 	return posts, nil
-// }
-
-// func (repository Posts) Like(postID uint64) error {
-// 	statement, err := repository.db.Prepare("update posts set likes = likes + 1 where id = ?")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer statement.Close()
-
-// 	if _, err = statement.Exec(postID); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (repository Posts) Dislike(postID uint64) error {
-// 	statement, err := repository.db.Prepare(`
-// 		update posts set likes =
-// 		CASE
-// 			WHEN likes > 0 THEN likes - 1
-// 			ELSE 0
-// 		END
-// 		where id = ?
-// 	 `)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer statement.Close()
-
-// 	if _, err = statement.Exec(postID); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-func (repository *PostsRepositoryMongo) CreateMongo(post entities.Post) (entities.Post, error) {
+func (repository *PostsRepository) Create(post entities.Post) (entities.Post, error) {
 	newPost := entities.Post{
 		Title:      post.Title,
 		Content:    post.Content,
@@ -227,10 +40,8 @@ func (repository *PostsRepositoryMongo) CreateMongo(post entities.Post) (entitie
 	return newPost, nil
 }
 
-func (repository *PostsRepositoryMongo) GetPostsMongo(nick string) ([]entities.Post, error) {
-	filter := bson.M{"authorNick": nick}
-
-	cursor, err := repository.collection.Find(context.TODO(), filter)
+func (repository *PostsRepository) GetPosts(nick string) ([]entities.Post, error) {
+	cursor, err := repository.collection.Find(context.TODO(), bson.M{"authorNick": nick})
 	if err != nil {
 		return []entities.Post{}, err
 	}
@@ -254,16 +65,14 @@ func (repository *PostsRepositoryMongo) GetPostsMongo(nick string) ([]entities.P
 	return results, nil
 }
 
-func (repository *PostsRepositoryMongo) GetPostWithIdMongo(id string) (entities.Post, error) {
+func (repository *PostsRepository) GetPostWithId(id string) (entities.Post, error) {
 	idString, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return entities.Post{}, err
 	}
 
-	filter := bson.M{"_id": idString}
-
 	var result entities.Post
-	err = repository.collection.FindOne(context.TODO(), filter).Decode(&result)
+	err = repository.collection.FindOne(context.TODO(), bson.M{"_id": idString}).Decode(&result)
 	if err != nil {
 		return entities.Post{}, fmt.Errorf("This post doens't exists")
 	}
@@ -271,17 +80,15 @@ func (repository *PostsRepositoryMongo) GetPostWithIdMongo(id string) (entities.
 	return result, nil
 }
 
-func (repository *PostsRepositoryMongo) UpdatePostMongo(postID string, updatedPost entities.Post) error {
+func (repository *PostsRepository) UpdatePost(postID string, updatedPost entities.Post) error {
 	idString, err := primitive.ObjectIDFromHex(postID)
 	if err != nil {
 		return err
 	}
-
-	filter := bson.M{"_id": idString}
 
 	update := bson.M{"$set": bson.M{"title": updatedPost.Title, "content": updatedPost.Content, "updatedAt": time.Now()}}
 
-	_, err = repository.collection.UpdateOne(context.TODO(), filter, update)
+	_, err = repository.collection.UpdateOne(context.TODO(), bson.M{"_id": idString}, update)
 	if err != nil {
 		return err
 	}
@@ -289,15 +96,13 @@ func (repository *PostsRepositoryMongo) UpdatePostMongo(postID string, updatedPo
 	return nil
 }
 
-func (repository *PostsRepositoryMongo) DeletePostMongo(postID string) error {
+func (repository *PostsRepository) DeletePost(postID string) error {
 	idString, err := primitive.ObjectIDFromHex(postID)
 	if err != nil {
 		return err
 	}
 
-	filter := bson.M{"_id": idString}
-
-	_, err = repository.collection.DeleteOne(context.TODO(), filter)
+	_, err = repository.collection.DeleteOne(context.TODO(), bson.M{"_id": idString})
 	if err != nil {
 		return err
 	}
@@ -305,7 +110,7 @@ func (repository *PostsRepositoryMongo) DeletePostMongo(postID string) error {
 	return nil
 }
 
-func (repository *PostsRepositoryMongo) GetAllPostsMongo() ([]entities.Post, error) {
+func (repository *PostsRepository) GetAllPosts() ([]entities.Post, error) {
 	cursor, err := repository.collection.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, err
@@ -325,7 +130,7 @@ func (repository *PostsRepositoryMongo) GetAllPostsMongo() ([]entities.Post, err
 	return posts, nil
 }
 
-func (repository *PostsRepositoryMongo) Like(postID string) error {
+func (repository *PostsRepository) Like(postID string) error {
 	idString, err := primitive.ObjectIDFromHex(postID)
 	if err != nil {
 		return err
@@ -339,7 +144,7 @@ func (repository *PostsRepositoryMongo) Like(postID string) error {
 	return nil
 }
 
-func (repository *PostsRepositoryMongo) Dislike(postID string) error {
+func (repository *PostsRepository) Dislike(postID string) error {
 	idString, err := primitive.ObjectIDFromHex(postID)
 	if err != nil {
 		return err

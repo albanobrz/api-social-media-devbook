@@ -15,26 +15,7 @@ services:
     networks:
       - main-network
     depends_on:
-      - db
       - mongo
-
-  db:
-    env_file:
-      - .env
-    image: mysql:latest
-    container_name: database
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - ./data:/var/lib/mysql
-    ports:
-      - "3307:3306"
-    networks:
-      - main-network
     
   mongo:
     env_file:

@@ -462,3 +462,43 @@ func GetAllPostsMongo(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusOK, posts)
 }
+
+func LikePostMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postID := params["postID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostsRepositoryMongo(db)
+	err = repository.Like(postID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, nil)
+}
+
+func DislikePostMongo(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postID := params["postID"]
+
+	db, err := database.ConnectMongo()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	repository := repositories.NewPostsRepositoryMongo(db)
+	err = repository.Dislike(postID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, nil)
+}

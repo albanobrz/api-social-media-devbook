@@ -324,3 +324,45 @@ func (repository *PostsRepositoryMongo) GetAllPostsMongo() ([]entities.Post, err
 
 	return posts, nil
 }
+
+func (repository *PostsRepositoryMongo) Like(postID string) error {
+	idString, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		return err
+	}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), bson.M{"_id": idString}, bson.M{"$inc": bson.M{"likes": 1}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository *PostsRepositoryMongo) Dislike(postID string) error {
+	idString, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		return err
+	}
+
+	var result entities.Post
+	err = repository.collection.FindOne(context.TODO(), bson.M{"_id": idString}).Decode(&result)
+	if err != nil {
+		return err
+	}
+
+	if result.Likes <= 0 {
+		return fmt.Errorf("Like amount is already 0")
+	}
+
+	update := bson.M{
+		"$inc": bson.M{"likes": -1},
+	}
+
+	_, err = repository.collection.UpdateOne(context.TODO(), bson.M{"_id": idString}, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

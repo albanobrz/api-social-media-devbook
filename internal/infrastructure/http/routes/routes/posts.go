@@ -90,4 +90,16 @@ var PostsRoutes = []Route{
 		Function:     controllers.GetAllPostsMongo,
 		RequiresAuth: true,
 	},
+	{
+		URI:          "/mongo/posts/{postID}/like",
+		Method:       http.MethodPost,
+		Function:     controllers.LikePostMongo,
+		RequiresAuth: true,
+	},
+	{
+		URI:          "/mongo/posts/{postID}/dislike",
+		Method:       http.MethodPost,
+		Function:     controllers.DislikePostMongo,
+		RequiresAuth: true,
+	},
 }

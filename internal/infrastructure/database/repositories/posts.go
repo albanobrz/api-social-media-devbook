@@ -157,7 +157,7 @@ func (repository *PostsRepository) Dislike(postID string) error {
 	}
 
 	if result.Likes <= 0 {
-		return fmt.Errorf("Like amount is already 0")
+		return fmt.Errorf("Like count is already 0")
 	}
 
 	update := bson.M{

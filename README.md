@@ -1,4 +1,38 @@
-## Docs
+# Social Media Devbook API
 
-- https://docs.mux.com/guides/video
-- https://dev.mysql.com/doc/ 
+This API was developed to practice, learn, and improve backend development skills. The architecture was inspired by my team's project, and it aims to replicate some of the popular functions of Twitter.
+
+## Documentation
+
+You can find the API documentation [here](https://documenter.getpostman.com/view/27691165/2s93mATewe). It provides detailed information about the API endpoints, request/response examples, and usage instructions.
+
+## How to Run
+
+You have two options to run the API: using Docker Compose or running it locally. Follow the steps below:
+
+**Using Docker Compose:**
+
+1. Make sure you have Docker installed on your machine.
+2. Run the following commands:
+   - `sudo docker compose build`
+   - `sudo docker compose up`
+3. Obtain the container IP by running: `sudo docker inspect mongo`. Set the obtained IP as the value for the `mongo_URI` environment variable in the `.env` file.
+
+**Running Locally:**
+
+1. Set up the `.env` file as per the provided example.
+2. Run the API using your preferred Go development tool or by running the main package.
+
+## Running Tests
+
+To run the tests, use the following command:
+
+`go test ./`
+
+
+### References
+
+Here are some of the references used during the development process:
+
+- [Mux Guides - Video](https://docs.mux.com/guides/video)
+- [MongoDB Documentation](https://www.mongodb.com/docs/)

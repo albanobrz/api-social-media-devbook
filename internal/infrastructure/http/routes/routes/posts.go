@@ -1,9 +1,18 @@
 package routes
 
 import (
+	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/controllers"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+func ConfigPostsRoutes(db *mongo.Database) []Route {
+
+	repository := repositories.NewPostsRepository(db)
+
+	controllers := controllers.NewPostsController(*repository)
 
 var PostsRoutes = []Route{
 	{

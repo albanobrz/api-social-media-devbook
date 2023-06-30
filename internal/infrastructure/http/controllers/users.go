@@ -3,9 +3,8 @@ package controllers
 import (
 	"api/internal/application/auth"
 	"api/internal/domain/entities"
+	"api/internal/domain/repositories"
 	"api/internal/domain/security"
-	database "api/internal/infrastructure/database"
-	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/responses"
 	"encoding/json"
 	"errors"
@@ -16,7 +15,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+type UsersController struct {
+	userRepository repositories.UsersRepository
+}
+
+func NewUsersController(userRepository repositories.UsersRepository) *UsersController {
+	return &UsersController{
+		userRepository,
+	}
+}
+
+func (controller *UsersController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	reqbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
@@ -34,14 +43,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	newUser, err := repository.Create(user)
+	// repository := repositories.NewUsersRepository(db)
+	// newUser, err := repository.Create(user)
+	newUser, err := controller.userRepository.Create(user)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -50,14 +54,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, newUser)
 }
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	users, err := repository.GetAllUsers()
+func (controller *UsersController) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := controller.userRepository.GetAllUsers()
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 	}
@@ -65,18 +63,12 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, users)
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	nick := params["userID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	user, err := repository.GetUserByNick(nick)
+	user, err := controller.userRepository.GetUserByNick(nick)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 	}
@@ -84,7 +76,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, user)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	nick := params["userID"]
 
@@ -118,14 +110,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	if err = repository.UpdateUser(nick, user); err != nil {
+	if err = controller.userRepository.UpdateUser(nick, user); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -133,7 +118,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userID := params["userID"]
 
@@ -148,14 +133,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	if err = repository.DeleteUser(userID); err != nil {
+	if err = controller.userRepository.DeleteUser(userID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -163,7 +141,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-func FollowUser(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) FollowUser(w http.ResponseWriter, r *http.Request) {
 	followerID, err := auth.GetUserNick(r)
 	if err != nil {
 		responses.Error(w, http.StatusUnauthorized, err)
@@ -178,14 +156,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	if err = repository.Follow(followerID, followedID); err != nil {
+	if err = controller.userRepository.Follow(followerID, followedID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -193,7 +164,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-func UnfollowUser(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	unfollowerID, err := auth.GetUserNick(r)
 	if err != nil {
 		responses.Error(w, http.StatusUnauthorized, err)
@@ -208,14 +179,7 @@ func UnfollowUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	if err = repository.Unfollow(unfollowerID, unfollowedID); err != nil {
+	if err = controller.userRepository.Unfollow(unfollowerID, unfollowedID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -223,18 +187,11 @@ func UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-func GetFollowers(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) GetFollowers(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userID := params["userID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	followers, err := repository.GetFollowers(userID)
+	followers, err := controller.userRepository.GetFollowers(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -243,18 +200,11 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, followers)
 }
 
-func GetFollowing(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) GetFollowing(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userID := params["userID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	following, err := repository.GetFollowing(userID)
+	following, err := controller.userRepository.GetFollowing(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -263,7 +213,7 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, following)
 }
 
-func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+func (controller *UsersController) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	userNickOnToken, err := auth.GetUserNick(r)
 	if err != nil {
 		responses.Error(w, http.StatusUnauthorized, err)
@@ -290,14 +240,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	passwordSavedOnDB, err := repository.GetPassword(userNick)
+	passwordSavedOnDB, err := controller.userRepository.GetPassword(userNick)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -314,7 +257,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = repository.UpdatePassword(userNick, string(HashedPassword)); err != nil {
+	if err = controller.userRepository.UpdatePassword(userNick, string(HashedPassword)); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}

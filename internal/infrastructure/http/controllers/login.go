@@ -3,16 +3,25 @@ package controllers
 import (
 	"api/internal/application/auth"
 	"api/internal/domain/entities"
+	"api/internal/domain/repositories"
 	"api/internal/domain/security"
-	database "api/internal/infrastructure/database"
-	"api/internal/infrastructure/database/repositories"
 	"api/internal/infrastructure/http/responses"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 )
 
-func Login(w http.ResponseWriter, r *http.Request) {
+type LoginController struct {
+	userRepository repositories.UsersRepository
+}
+
+func NewLoginController(userRepository repositories.UsersRepository) *LoginController {
+	return &LoginController{
+		userRepository,
+	}
+}
+
+func (controller *LoginController) Login(w http.ResponseWriter, r *http.Request) {
 	reqbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
@@ -24,13 +33,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-	}
-
-	repository := repositories.NewUsersRepository(db)
-	userSavedOnDB, err := repository.SearchByEmail(user.Email)
+	userSavedOnDB, err := controller.userRepository.SearchByEmail(user.Email)
 	if err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return

@@ -14,7 +14,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CreatePost(w http.ResponseWriter, r *http.Request) {
+type PostsController struct {
+	PostRepository repositories.PostsRepository
+}
+
+func NewPostsController(postRepository repositories.PostsRepository) *PostsController {
+	return &PostsController{
+		postRepository,
+	}
+}
+
+func (controller *PostsController) CreatePost(w http.ResponseWriter, r *http.Request) {
 	userNick, err := auth.GetUserNick(r)
 	if err != nil {
 		responses.Error(w, http.StatusUnauthorized, err)
@@ -56,7 +66,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, post)
 }
 
-func GetPosts(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) GetPosts(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userNick := params["userID"]
 
@@ -76,7 +86,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, posts)
 }
 
-func UpdatePost(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	userNick, err := auth.GetUserNick(r)
 	if err != nil {
 		responses.Error(w, http.StatusUnauthorized, err)
@@ -128,7 +138,7 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-func DeletePost(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) DeletePost(w http.ResponseWriter, r *http.Request) {
 	userNick, err := auth.GetUserNick(r)
 	if err != nil {
 		responses.Error(w, http.StatusUnauthorized, err)
@@ -163,7 +173,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-func GetPost(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) GetPost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	postID := params["postID"]
 
@@ -183,7 +193,7 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, post)
 }
 
-func GetAllPosts(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	db, err := database.Connect()
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -200,7 +210,7 @@ func GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, posts)
 }
 
-func LikePost(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) LikePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	postID := params["postID"]
 
@@ -220,7 +230,7 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, nil)
 }
 
-func DislikePost(w http.ResponseWriter, r *http.Request) {
+func (controller *PostsController) DislikePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	postID := params["postID"]
 

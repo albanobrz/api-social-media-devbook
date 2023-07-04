@@ -2,35 +2,62 @@ package main
 
 import (
 	"api/internal/infrastructure/config"
-	router "api/internal/infrastructure/http/routes"
-	"context"
+	"api/internal/infrastructure/database"
+	"api/internal/infrastructure/http/middlewares"
+	router "api/internal/infrastructure/http/routes/routes"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+func configurateRoutes(r *mux.Router, db *mongo.Database) *mux.Router {
+	routes := []router.Route{}
+
+	usersRoutes := router.ConfigUsersRoutes(db)
+	postsRoutes := router.ConfigPostsRoutes(db)
+	loginRoute := router.ConfigLoginRoutes(db)
+
+	routes = append(routes, usersRoutes...)
+	routes = append(routes, postsRoutes...)
+	routes = append(routes, loginRoute)
+
+	for _, route := range routes {
+		if route.RequiresAuth {
+			r.HandleFunc(route.URI,
+				middlewares.Logger(
+					middlewares.Authenticate(route.Controller),
+				),
+			).Methods(route.Method)
+		} else {
+			r.HandleFunc(route.URI, route.Controller).Methods(route.Method)
+		}
+	}
+
+	return r
+}
 
 func main() {
 	config.Load()
-	r := router.Create()
 
 	fmt.Printf("Listening in port %d", config.Port)
 
-	clientOptions := options.Client().ApplyURI(os.Getenv("DB_MONGO_URI"))
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	mongo, err := database.Connect()
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Errorf("Could not connect on mongoDB: %s", err))
 	}
 
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	r := mux.NewRouter()
 
-	fmt.Println("Connected to mongoDB")
+	configRoutes := configurateRoutes(r, mongo)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
+	var PORT = fmt.Sprintf(":%v", config.Port)
+
+	fmt.Printf("Listening on PORT %v...\n", config.Port)
+	fmt.Println(mongo)
+	log.Fatal(http.ListenAndServe(PORT, configRoutes))
+
+	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
 }

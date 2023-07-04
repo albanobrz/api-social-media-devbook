@@ -12,67 +12,67 @@ func ConfigUsersRoutes(db *mongo.Database) []Route {
 
 	repository := repositories.NewUsersRepository(db)
 
-	controllers := controllers.NewUsersController(*repository)
+	controllers := controllers.NewUsersController(repository)
 
 	var userRoutes = []Route{
 		{
 			URI:          "/mongo/users",
 			Method:       http.MethodPost,
-			Function:     controllers.CreateUser,
+			Controller:   controllers.CreateUser,
 			RequiresAuth: false,
 		},
 		{
 			URI:          "/mongo/users/",
 			Method:       http.MethodGet,
-			Function:     controllers.GetAllUsers,
+			Controller:   controllers.GetAllUsers,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}",
 			Method:       http.MethodGet,
-			Function:     controllers.GetUser,
+			Controller:   controllers.GetUser,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}",
 			Method:       http.MethodPut,
-			Function:     controllers.UpdateUser,
+			Controller:   controllers.UpdateUser,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}",
 			Method:       http.MethodDelete,
-			Function:     controllers.DeleteUser,
+			Controller:   controllers.DeleteUser,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}/follow",
 			Method:       http.MethodPost,
-			Function:     controllers.FollowUser,
+			Controller:   controllers.FollowUser,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}/unfollow",
 			Method:       http.MethodDelete,
-			Function:     controllers.UnfollowUser,
+			Controller:   controllers.UnfollowUser,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}/followers",
 			Method:       http.MethodGet,
-			Function:     controllers.GetFollowers,
+			Controller:   controllers.GetFollowers,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}/following",
 			Method:       http.MethodGet,
-			Function:     controllers.GetFollowing,
+			Controller:   controllers.GetFollowing,
 			RequiresAuth: true,
 		},
 		{
 			URI:          "/mongo/users/{userID}/update-password",
 			Method:       http.MethodPost,
-			Function:     controllers.UpdatePassword,
+			Controller:   controllers.UpdatePassword,
 			RequiresAuth: true,
 		},
 	}

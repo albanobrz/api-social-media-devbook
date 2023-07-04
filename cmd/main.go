@@ -25,7 +25,7 @@ func configurateRoutes(r *mux.Router, db *mongo.Database) *mux.Router {
 	routes = append(routes, loginRoute)
 
 	for _, route := range routes {
-		if route.NeedAuth {
+		if route.RequiresAuth {
 			r.HandleFunc(route.URI,
 				middlewares.Logger(
 					middlewares.Authenticate(route.Controller),

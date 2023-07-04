@@ -12,12 +12,12 @@ func ConfigLoginRoutes(db *mongo.Database) Route {
 
 	repository := repositories.NewUsersRepository(db)
 
-	controllers := controllers.NewUsersController(*repository)
+	controllers := controllers.NewLoginController(repository)
 
 	var LoginRoutes = Route{
 		URI:          "/login",
 		Method:       http.MethodPost,
-		Function:     controllers.Login,
+		Controller:   controllers.Login,
 		RequiresAuth: false,
 	}
 	return LoginRoutes

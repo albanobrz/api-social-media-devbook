@@ -4,7 +4,7 @@ import (
 	"api/internal/infrastructure/config"
 	"api/internal/infrastructure/database"
 	"api/internal/infrastructure/http/middlewares"
-	router "api/internal/infrastructure/http/routes/routes"
+	router "api/internal/infrastructure/http/router/mux/routes"
 	"fmt"
 	"log"
 	"net/http"
@@ -42,8 +42,6 @@ func configurateRoutes(r *mux.Router, db *mongo.Database) *mux.Router {
 func main() {
 	config.Load()
 
-	fmt.Printf("Listening in port %d", config.Port)
-
 	mongo, err := database.Connect()
 	if err != nil {
 		panic(fmt.Errorf("Could not connect on mongoDB: %s", err))
@@ -56,8 +54,5 @@ func main() {
 	var PORT = fmt.Sprintf(":%v", config.Port)
 
 	fmt.Printf("Listening on PORT %v...\n", config.Port)
-	fmt.Println(mongo)
 	log.Fatal(http.ListenAndServe(PORT, configRoutes))
-
-	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
 }

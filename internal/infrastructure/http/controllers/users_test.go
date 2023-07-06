@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -78,7 +80,7 @@ func TestCreateUser(t *testing.T) {
 
 			usersController := NewUsersController(repositoryMock)
 
-			req := httptest.NewRequest("POST", "/users", test.input)
+			req := httptest.NewRequest("POST", "/mongo/users", test.input)
 			rr := httptest.NewRecorder()
 
 			controller := http.HandlerFunc(usersController.CreateUser)
@@ -87,6 +89,224 @@ func TestCreateUser(t *testing.T) {
 			if rr.Result().StatusCode != test.expectedStatusCode {
 				t.Errorf("Error on status code got %d; expected %d", rr.Result().StatusCode, test.expectedStatusCode)
 			}
+		})
+	}
+}
+
+func TestGetAllUsers(t *testing.T) {
+
+	tests := []struct {
+		name                      string
+		input                     string
+		expectedGetAllUsersReturn []entities.User
+		expectedGetAllUsersError  error
+		expectedStatusCode        int
+	}{
+		{
+			name:                      "Success on GetUsers",
+			input:                     "",
+			expectedGetAllUsersReturn: []entities.User{},
+			expectedGetAllUsersError:  nil,
+			expectedStatusCode:        200,
+		},
+		{
+			name:                      "Error on GetUsers",
+			input:                     "",
+			expectedGetAllUsersReturn: []entities.User{},
+			expectedGetAllUsersError:  assert.AnError,
+			expectedStatusCode:        500,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewUsersRepositoryMock()
+			repositoryMock.On("GetAllUsers").Return(test.expectedGetAllUsersReturn, test.expectedGetAllUsersError)
+
+			usersController := NewUsersController(repositoryMock)
+
+			req, _ := http.NewRequest("GET", "/mongo/users/", nil)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(usersController.GetAllUsers)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
+}
+
+func TestGetUser(t *testing.T) {
+
+	var returnedUser entities.User
+	userSerialized, _ := os.ReadFile("../../../../../test/resources/user.json")
+	json.Unmarshal(userSerialized, &returnedUser)
+
+	tests := []struct {
+		name                  string
+		requestID             string
+		expectedStatusCode    int
+		input                 string
+		expectedGetUserReturn entities.User
+		expectedGetUserError  error
+	}{
+		{
+			name:                  "Success on GetUser",
+			requestID:             "1",
+			expectedStatusCode:    200,
+			input:                 "1",
+			expectedGetUserReturn: returnedUser,
+			expectedGetUserError:  nil,
+		},
+		{
+			name:                  "Error on GetUser",
+			requestID:             "1",
+			expectedStatusCode:    500,
+			input:                 "1",
+			expectedGetUserReturn: entities.User{},
+			expectedGetUserError:  assert.AnError,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewUsersRepositoryMock()
+			repositoryMock.On("GetUserByNick", test.input).Return(test.expectedGetUserReturn, test.expectedGetUserError)
+
+			usersController := NewUsersController(repositoryMock)
+
+			req, _ := http.NewRequest("GET", "/mongo/users/", nil)
+			params := map[string]string{
+				"userID": test.requestID,
+			}
+			req = mux.SetURLVars(req, params)
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(usersController.GetUser)
+
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
+}
+
+func TestUpdateUser(t *testing.T) {
+
+	tests := []struct {
+		name                  string
+		input                 string
+		urlId                 string
+		validToken            string
+		userId                string
+		expectedStatusCode    int
+		expectedUpdatedReturn error
+		expectedUpdatedError  error
+	}{
+		{
+			name:                  "Success on UpdateUser",
+			input:                 `{"name":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "1",
+			validToken:            ValidToken,
+			userId:                "1",
+			expectedStatusCode:    204,
+			expectedUpdatedReturn: nil,
+			expectedUpdatedError:  nil,
+		},
+		{
+			name:                  "Error on UpdateUser, unexistent url ID",
+			input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "",
+			validToken:            ValidToken,
+			userId:                "1",
+			expectedStatusCode:    403,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+		{
+			name:                  "Error on UpdateUser, ExtractUserID",
+			input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "1",
+			validToken:            ValidToken + "invalidate token",
+			userId:                "1",
+			expectedStatusCode:    401,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+		{
+			name:                  "Error on UpdateUser, tokenId != requestId",
+			input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "1",
+			validToken:            DiffToken,
+			userId:                "1",
+			expectedStatusCode:    403,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+		{
+			name:                  "Error on UpdateUser, empty bodyReq",
+			input:                 "",
+			urlId:                 "1",
+			validToken:            ValidToken,
+			userId:                "1",
+			expectedStatusCode:    400,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+		{
+			name:                  "Error on UpdateUser, broken bodyReq",
+			input:                 `{"usernameupdated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "1",
+			validToken:            ValidToken,
+			userId:                "1",
+			expectedStatusCode:    400,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+		{
+			name:                  "Error on UpdateUser, incorrect field on bodyReq",
+			input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "1",
+			validToken:            ValidToken,
+			userId:                "1",
+			expectedStatusCode:    400,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+		{
+			name:                  "Error on call UpdateUser",
+			input:                 `{"invalidField":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
+			urlId:                 "1",
+			validToken:            ValidToken,
+			userId:                "1",
+			expectedStatusCode:    400,
+			expectedUpdatedReturn: assert.AnError,
+			expectedUpdatedError:  assert.AnError,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewUsersRepositoryMock()
+			repositoryMock.On("UpdateUser", test.userId, mock.AnythingOfType("entities.User")).Return(test.expectedUpdatedReturn, test.expectedUpdatedError)
+
+			usersController := NewUsersController(repositoryMock)
+
+			req, _ := http.NewRequest("PUT", "/mongo/users/", strings.NewReader(test.input))
+			req.Header.Add("Authorization", "Bearer "+test.validToken)
+			params := map[string]string{
+				"userID": test.urlId,
+			}
+			req = mux.SetURLVars(req, params)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(usersController.UpdateUser)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+
 		})
 	}
 }

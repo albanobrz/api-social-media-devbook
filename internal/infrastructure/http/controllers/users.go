@@ -43,8 +43,6 @@ func (controller *UsersController) CreateUser(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// repository := repositories.NewUsersRepository(db)
-	// newUser, err := repository.Create(user)
 	newUser, err := controller.userRepository.Create(user)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)

@@ -16,49 +16,49 @@ func ConfigPostsRoutes(db *mongo.Database) []Route {
 
 	var PostsRoutes = []Route{
 		{
-			URI:          "/mongo/posts",
+			URI:          "/posts",
 			Method:       http.MethodPost,
 			Controller:   controllers.CreatePost,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts/{userID}",
+			URI:          "/posts/{userID}",
 			Method:       http.MethodGet,
 			Controller:   controllers.GetPosts,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts/{postID}",
+			URI:          "/posts/{postID}",
 			Method:       http.MethodPut,
 			Controller:   controllers.UpdatePost,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts/{postID}",
+			URI:          "/posts/{postID}",
 			Method:       http.MethodDelete,
 			Controller:   controllers.DeletePost,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts/specific/{postID}",
+			URI:          "/posts/specific/{postID}",
 			Method:       http.MethodGet,
 			Controller:   controllers.GetPost,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts",
+			URI:          "/posts",
 			Method:       http.MethodGet,
 			Controller:   controllers.GetAllPosts,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts/{postID}/like",
+			URI:          "/posts/{postID}/like",
 			Method:       http.MethodPost,
 			Controller:   controllers.LikePost,
 			RequiresAuth: true,
 		},
 		{
-			URI:          "/mongo/posts/{postID}/dislike",
+			URI:          "/posts/{postID}/dislike",
 			Method:       http.MethodPost,
 			Controller:   controllers.DislikePost,
 			RequiresAuth: true,

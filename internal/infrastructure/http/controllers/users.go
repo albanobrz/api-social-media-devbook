@@ -189,6 +189,11 @@ func (controller *UsersController) GetFollowers(w http.ResponseWriter, r *http.R
 	params := mux.Vars(r)
 	userID := params["userID"]
 
+	if userID == "" {
+		responses.Error(w, http.StatusBadRequest, errors.New("You must insert the user ID"))
+		return
+	}
+
 	followers, err := controller.userRepository.GetFollowers(userID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
@@ -201,6 +206,11 @@ func (controller *UsersController) GetFollowers(w http.ResponseWriter, r *http.R
 func (controller *UsersController) GetFollowing(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userID := params["userID"]
+
+	if userID == "" {
+		responses.Error(w, http.StatusBadRequest, errors.New("You must insert the user ID"))
+		return
+	}
 
 	following, err := controller.userRepository.GetFollowing(userID)
 	if err != nil {

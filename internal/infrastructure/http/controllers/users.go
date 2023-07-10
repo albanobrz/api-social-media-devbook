@@ -230,8 +230,8 @@ func (controller *UsersController) UpdatePassword(w http.ResponseWriter, r *http
 
 	params := mux.Vars(r)
 	userNick := params["userID"]
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
+	if userNick == "" {
+		responses.Error(w, http.StatusBadRequest, errors.New("userID is missing"))
 		return
 	}
 

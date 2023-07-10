@@ -73,3 +73,8 @@ func (repository *UsersRepositoryMock) UpdatePassword(nick string, password stri
 	args := repository.Called(nick, password)
 	return args.Error(0)
 }
+
+func (repository *UsersRepositoryMock) SecurityMock(passwordSavedOnDb string, newPassword string) error {
+	args := repository.Called(passwordSavedOnDb, newPassword)
+	return args.Error(0)
+}

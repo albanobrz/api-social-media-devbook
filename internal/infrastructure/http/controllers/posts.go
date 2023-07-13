@@ -3,8 +3,7 @@ package controllers
 import (
 	"api/internal/application/auth"
 	"api/internal/domain/entities"
-	database "api/internal/infrastructure/database"
-	"api/internal/infrastructure/database/repositories"
+	"api/internal/domain/repositories"
 	"api/internal/infrastructure/http/responses"
 	"encoding/json"
 	"errors"
@@ -50,14 +49,7 @@ func (controller *PostsController) CreatePost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	post, err = repository.CreatePost(post)
+	post, err = controller.PostRepository.CreatePost(post)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -70,14 +62,7 @@ func (controller *PostsController) GetPosts(w http.ResponseWriter, r *http.Reque
 	params := mux.Vars(r)
 	userNick := params["userID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	posts, err := repository.GetPosts(userNick)
+	posts, err := controller.PostRepository.GetPosts(userNick)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -96,14 +81,7 @@ func (controller *PostsController) UpdatePost(w http.ResponseWriter, r *http.Req
 	params := mux.Vars(r)
 	postID := params["postID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	postSavedOnDB, err := repository.GetPostWithId(postID)
+	postSavedOnDB, err := controller.PostRepository.GetPostWithId(postID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -130,7 +108,7 @@ func (controller *PostsController) UpdatePost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err = repository.UpdatePost(postID, post); err != nil {
+	if err = controller.PostRepository.UpdatePost(postID, post); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -148,14 +126,7 @@ func (controller *PostsController) DeletePost(w http.ResponseWriter, r *http.Req
 	params := mux.Vars(r)
 	postID := params["postID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	postSavedOnDB, err := repository.GetPostWithId(postID)
+	postSavedOnDB, err := controller.PostRepository.GetPostWithId(postID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -165,7 +136,7 @@ func (controller *PostsController) DeletePost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if err = repository.DeletePost(postID); err != nil {
+	if err = controller.PostRepository.DeletePost(postID); err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -177,14 +148,7 @@ func (controller *PostsController) GetPost(w http.ResponseWriter, r *http.Reques
 	params := mux.Vars(r)
 	postID := params["postID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	post, err := repository.GetPostWithId(postID)
+	post, err := controller.PostRepository.GetPostWithId(postID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -194,14 +158,7 @@ func (controller *PostsController) GetPost(w http.ResponseWriter, r *http.Reques
 }
 
 func (controller *PostsController) GetAllPosts(w http.ResponseWriter, r *http.Request) {
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	posts, err := repository.GetAllPosts()
+	posts, err := controller.PostRepository.GetAllPosts()
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -214,14 +171,7 @@ func (controller *PostsController) LikePost(w http.ResponseWriter, r *http.Reque
 	params := mux.Vars(r)
 	postID := params["postID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	err = repository.Like(postID)
+	err := controller.PostRepository.Like(postID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return
@@ -234,14 +184,7 @@ func (controller *PostsController) DislikePost(w http.ResponseWriter, r *http.Re
 	params := mux.Vars(r)
 	postID := params["postID"]
 
-	db, err := database.Connect()
-	if err != nil {
-		responses.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	repository := repositories.NewPostsRepository(db)
-	err = repository.Dislike(postID)
+	err := controller.PostRepository.Dislike(postID)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return

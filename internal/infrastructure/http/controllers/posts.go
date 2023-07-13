@@ -57,7 +57,7 @@ func (controller *PostsController) CreatePost(w http.ResponseWriter, r *http.Req
 	}
 
 	repository := repositories.NewPostsRepository(db)
-	post, err = repository.Create(post)
+	post, err = repository.CreatePost(post)
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)
 		return

@@ -22,7 +22,7 @@ func NewPostsRepository(db *mongo.Database) *PostsRepository {
 	}
 }
 
-func (repository *PostsRepository) Create(post entities.Post) (entities.Post, error) {
+func (repository *PostsRepository) CreatePost(post entities.Post) (entities.Post, error) {
 	newPost := entities.Post{
 		Title:      post.Title,
 		Content:    post.Content,

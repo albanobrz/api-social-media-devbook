@@ -105,7 +105,6 @@ func TestGetPosts(t *testing.T) {
 
 	tests := []struct {
 		name                      string
-		input                     string
 		userId                    string
 		validToken                string
 		expectedGetAllPostsResult []entities.Post
@@ -114,7 +113,6 @@ func TestGetPosts(t *testing.T) {
 	}{
 		{
 			name:                      "Success on GetAllPosts",
-			input:                     "",
 			userId:                    "1",
 			validToken:                ValidToken,
 			expectedGetAllPostsResult: []entities.Post{},
@@ -123,7 +121,6 @@ func TestGetPosts(t *testing.T) {
 		},
 		{
 			name:                      "Error on GetAllPosts",
-			input:                     "",
 			userId:                    "1",
 			validToken:                ValidToken,
 			expectedGetAllPostsResult: []entities.Post{},
@@ -139,10 +136,10 @@ func TestGetPosts(t *testing.T) {
 
 			postsController := NewPostsController(repositoryMock)
 
-			req, _ := http.NewRequest("GET", "/posts/", strings.NewReader(test.input))
+			req, _ := http.NewRequest("GET", "/posts/", nil)
 			req.Header.Add("Authorization", "Bearer "+test.validToken)
 			params := map[string]string{
-				"postID": test.userId,
+				"userID": test.userId,
 			}
 			req = mux.SetURLVars(req, params)
 

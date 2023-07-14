@@ -1,6 +1,6 @@
 # Social Media Devbook API
 
-This API was developed to practice, learn, and improve backend development skills. The architecture was inspired by my team's project, and it aims to replicate some of the popular functions of Twitter.
+This API was developed to practice, learn, and improve backend development skills. Its a simple social media app, inspired on Twitter. The architecture was inspired by my team's project, the hexagonal pattern.
 
 ## Documentation
 
@@ -28,11 +28,3 @@ You have two options to run the API: using Docker Compose or running it locally.
 To run the tests, use the following command:
 
 `go test ./`
-
-
-### References
-
-Here are some of the references used during the development process:
-
-- [Mux Guides - Video](https://docs.mux.com/guides/video)
-- [MongoDB Documentation](https://www.mongodb.com/docs/)

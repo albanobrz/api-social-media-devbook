@@ -16,6 +16,14 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+var postMocked = entities.Post{
+	Title:      "Test Post",
+	Content:    "new post",
+	AuthorID:   "1",
+	AuthorNick: "1",
+	Likes:      0,
+}
+
 func TestCreatePost(t *testing.T) {
 	postSerialized, err := os.ReadFile("../../../../test/resources/post.json")
 
@@ -157,83 +165,62 @@ func TestUpdatePost(t *testing.T) {
 		expectedUpdatedResult    error
 	}{
 		{
-			name:                  "Success on UpdateUser",
-			input:                 `{"title": "Wow", "content": "updated post"}`,
-			urlId:                 "64a399cdb6a0487490ed730c",
-			validToken:            ValidToken,
-			userId:                "1",
-			expectedStatusCode:    204,
-			expectedUpdatedResult: nil,
+			name:                    "Success on UpdatePost",
+			input:                   `{"title": "Wow", "content": "updated post"}`,
+			urlId:                   "64a399cdb6a0487490ed730c",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      204,
+			expectedPostWithIdError: nil,
+			expectedUpdatedResult:   nil,
 		},
-		// {
-		// 	name:                  "Error on UpdateUser, unexistent url ID",
-		// 	input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
-		// 	urlId:                 "",
-		// 	validToken:            ValidToken,
-		// 	userId:                "1",
-		// 	expectedStatusCode:    403,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
-		// {
-		// 	name:                  "Error on UpdateUser, ExtractUserID",
-		// 	input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
-		// 	urlId:                 "1",
-		// 	validToken:            ValidToken + "invalidate token",
-		// 	userId:                "1",
-		// 	expectedStatusCode:    401,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
-		// {
-		// 	name:                  "Error on UpdateUser, tokenId != requestId",
-		// 	input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
-		// 	urlId:                 "1",
-		// 	validToken:            DiffToken,
-		// 	userId:                "1",
-		// 	expectedStatusCode:    403,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
-		// {
-		// 	name:                  "Error on UpdateUser, empty bodyReq",
-		// 	input:                 "",
-		// 	urlId:                 "1",
-		// 	validToken:            ValidToken,
-		// 	userId:                "1",
-		// 	expectedStatusCode:    400,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
-		// {
-		// 	name:                  "Error on UpdateUser, broken bodyReq",
-		// 	input:                 `{"usernameupdated", "nick":"testupdated", "email":"user1@email.com"}`,
-		// 	urlId:                 "1",
-		// 	validToken:            ValidToken,
-		// 	userId:                "1",
-		// 	expectedStatusCode:    400,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
-		// {
-		// 	name:                  "Error on UpdateUser, incorrect field on bodyReq",
-		// 	input:                 `{"username":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
-		// 	urlId:                 "1",
-		// 	validToken:            ValidToken,
-		// 	userId:                "1",
-		// 	expectedStatusCode:    400,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
-		// {
-		// 	name:                  "Error on call UpdateUser",
-		// 	input:                 `{"invalidField":"updated", "nick":"testupdated", "email":"user1@email.com"}`,
-		// 	urlId:                 "1",
-		// 	validToken:            ValidToken,
-		// 	userId:                "1",
-		// 	expectedStatusCode:    400,
-		// 	expectedUpdatedResult: assert.AnError,
-		// },
+		{
+			name:                    "Error on UpdatePost, unexistent url ID",
+			input:                   `{"title": "Wow", "content": "updated post"}`,
+			urlId:                   "2222",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      500,
+			expectedPostWithIdError: assert.AnError,
+			expectedUpdatedResult:   assert.AnError,
+		},
+		{
+			name:                    "Error on UpdatePost, tokenId != PostAuthorNick",
+			input:                   `{"title": "Wow", "content": "updated post"}`,
+			urlId:                   "64a399cdb6a0487490ed730c",
+			validToken:              DiffToken,
+			userId:                  "1",
+			expectedStatusCode:      403,
+			expectedPostWithIdError: nil,
+			expectedUpdatedResult:   assert.AnError,
+		},
+		{
+			name:                    "Error on UpdatePost, empty bodyReq",
+			input:                   "",
+			urlId:                   "64a399cdb6a0487490ed730c",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      400,
+			expectedPostWithIdError: nil,
+			expectedUpdatedResult:   assert.AnError,
+		},
+		{
+			name:                    "Error on call UpdatePost",
+			input:                   `{"title": "Wow", "content": "updated post"}`,
+			urlId:                   "1",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      500,
+			expectedPostWithIdError: nil,
+			expectedUpdatedResult:   assert.AnError,
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repositoryMock := mocks.NewPostsRepositoryMock()
-			repositoryMock.On("GetPostWithId", test.urlId).Return(test.expectedPostWithIdResult, test.expectedPostWithIdError)
+
+			repositoryMock.On("GetPostWithId", test.urlId).Return(postMocked, test.expectedPostWithIdError)
 			repositoryMock.On("UpdatePost", test.urlId, mock.AnythingOfType("entities.Post")).Return(test.expectedUpdatedResult)
 
 			postsController := NewPostsController(repositoryMock)
@@ -254,4 +241,90 @@ func TestUpdatePost(t *testing.T) {
 
 		})
 	}
+}
+
+func TestDeletePost(t *testing.T) {
+
+	tests := []struct {
+		name                     string
+		urlId                    string
+		validToken               string
+		userId                   string
+		expectedPostWithIdResult entities.Post
+		expectedPostWithIdError  error
+		expectedStatusCode       int
+		expectedDeleteResult     error
+	}{
+		{
+			name:                    "Success on DeletePost",
+			urlId:                   "64a399cdb6a0487490ed730c",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      204,
+			expectedPostWithIdError: nil,
+			expectedDeleteResult:    nil,
+		},
+		{
+			name:                    "Error on DeletePost",
+			urlId:                   "64a399cdb6a0487490ed730c",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      500,
+			expectedPostWithIdError: nil,
+			expectedDeleteResult:    assert.AnError,
+		},
+		{
+			name:                    "Error on Delete, incorrect postID",
+			urlId:                   "2222",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      500,
+			expectedPostWithIdError: assert.AnError,
+			expectedDeleteResult:    nil,
+		},
+		{
+			name:                    "Error on Delete, invalid authToken",
+			urlId:                   "64a399cdb6a0487490ed730c",
+			validToken:              DiffToken,
+			userId:                  "1",
+			expectedStatusCode:      403,
+			expectedPostWithIdError: nil,
+			expectedDeleteResult:    nil,
+		},
+		{
+			name:                    "Error on Delete, empty postID",
+			urlId:                   "",
+			validToken:              ValidToken,
+			userId:                  "1",
+			expectedStatusCode:      500,
+			expectedPostWithIdError: assert.AnError,
+			expectedDeleteResult:    nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewPostsRepositoryMock()
+
+			repositoryMock.On("GetPostWithId", test.urlId).Return(postMocked, test.expectedPostWithIdError)
+			repositoryMock.On("DeletePost", test.urlId).Return(test.expectedDeleteResult)
+
+			postsController := NewPostsController(repositoryMock)
+
+			req, _ := http.NewRequest("DELETE", "/posts/", nil)
+			req.Header.Add("Authorization", "Bearer "+test.validToken)
+			params := map[string]string{
+				"postID": test.urlId,
+			}
+			req = mux.SetURLVars(req, params)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(postsController.DeletePost)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
+
 }

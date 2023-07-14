@@ -106,6 +106,8 @@ func TestGetPosts(t *testing.T) {
 	tests := []struct {
 		name                      string
 		input                     string
+		userId                    string
+		validToken                string
 		expectedGetAllPostsResult []entities.Post
 		expectedError             error
 		expectedStatusCode        int
@@ -113,6 +115,8 @@ func TestGetPosts(t *testing.T) {
 		{
 			name:                      "Success on GetAllPosts",
 			input:                     "",
+			userId:                    "1",
+			validToken:                ValidToken,
 			expectedGetAllPostsResult: []entities.Post{},
 			expectedError:             nil,
 			expectedStatusCode:        200,
@@ -120,6 +124,8 @@ func TestGetPosts(t *testing.T) {
 		{
 			name:                      "Error on GetAllPosts",
 			input:                     "",
+			userId:                    "1",
+			validToken:                ValidToken,
 			expectedGetAllPostsResult: []entities.Post{},
 			expectedError:             assert.AnError,
 			expectedStatusCode:        500,
@@ -129,15 +135,20 @@ func TestGetPosts(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			repositoryMock := mocks.NewPostsRepositoryMock()
-			repositoryMock.On("GetAllPosts").Return(test.expectedGetAllPostsResult, test.expectedError)
+			repositoryMock.On("GetPosts", test.userId).Return(test.expectedGetAllPostsResult, test.expectedError)
 
 			postsController := NewPostsController(repositoryMock)
 
-			req, _ := http.NewRequest("GET", "/posts/", nil)
+			req, _ := http.NewRequest("GET", "/posts/", strings.NewReader(test.input))
+			req.Header.Add("Authorization", "Bearer "+test.validToken)
+			params := map[string]string{
+				"postID": test.userId,
+			}
+			req = mux.SetURLVars(req, params)
 
 			rr := httptest.NewRecorder()
 
-			controller := http.HandlerFunc(postsController.GetAllPosts)
+			controller := http.HandlerFunc(postsController.GetPosts)
 			controller.ServeHTTP(rr, req)
 
 			assert.Equal(t, test.expectedStatusCode, rr.Code)
@@ -146,12 +157,6 @@ func TestGetPosts(t *testing.T) {
 }
 
 func TestUpdatePost(t *testing.T) {
-
-	// postSerialized, err := os.ReadFile("../../../../test/resources/post.json")
-
-	// if err != nil {
-	// 	t.Errorf("json")
-	// }
 
 	tests := []struct {
 		name                     string
@@ -326,5 +331,220 @@ func TestDeletePost(t *testing.T) {
 			assert.Equal(t, test.expectedStatusCode, rr.Code)
 		})
 	}
+}
 
+func TestGetPost(t *testing.T) {
+
+	tests := []struct {
+		name                  string
+		urlId                 string
+		validToken            string
+		expectedGetPostResult entities.Post
+		expectedError         error
+		expectedStatusCode    int
+	}{
+		{
+			name:                  "Success on GetPost",
+			urlId:                 "64a399cdb6a0487490ed730c",
+			validToken:            ValidToken,
+			expectedGetPostResult: entities.Post{},
+			expectedError:         nil,
+			expectedStatusCode:    200,
+		},
+		{
+			name:                  "Error on GetPost",
+			urlId:                 "64a399cdb6a0487490ed730c",
+			validToken:            ValidToken,
+			expectedGetPostResult: entities.Post{},
+			expectedError:         assert.AnError,
+			expectedStatusCode:    500,
+		},
+		{
+			name:                  "Wrong postID",
+			urlId:                 "2222",
+			validToken:            ValidToken,
+			expectedGetPostResult: entities.Post{},
+			expectedError:         assert.AnError,
+			expectedStatusCode:    500,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewPostsRepositoryMock()
+			repositoryMock.On("GetPostWithId", test.urlId).Return(postMocked, test.expectedError)
+
+			postsController := NewPostsController(repositoryMock)
+
+			req, _ := http.NewRequest("GET", "/posts/", nil)
+			req.Header.Add("Authorization", "Bearer "+test.validToken)
+			params := map[string]string{
+				"postID": test.urlId,
+			}
+			req = mux.SetURLVars(req, params)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(postsController.GetPost)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
+}
+
+func TestGetAllPosts(t *testing.T) {
+
+	tests := []struct {
+		name                      string
+		input                     string
+		expectedGetAllPostsResult []entities.Post
+		expectedError             error
+		expectedStatusCode        int
+	}{
+		{
+			name:                      "Success on GetAllPosts",
+			input:                     "",
+			expectedGetAllPostsResult: []entities.Post{},
+			expectedError:             nil,
+			expectedStatusCode:        200,
+		},
+		{
+			name:                      "Error on GetAllPosts",
+			input:                     "",
+			expectedGetAllPostsResult: []entities.Post{},
+			expectedError:             assert.AnError,
+			expectedStatusCode:        500,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewPostsRepositoryMock()
+			repositoryMock.On("GetAllPosts").Return(test.expectedGetAllPostsResult, test.expectedError)
+
+			postsController := NewPostsController(repositoryMock)
+
+			req, _ := http.NewRequest("GET", "/posts/", nil)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(postsController.GetAllPosts)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
+}
+
+func TestLikePost(t *testing.T) {
+
+	tests := []struct {
+		name               string
+		urlId              string
+		validToken         string
+		expectedError      error
+		expectedStatusCode int
+	}{
+		{
+			name:               "Success on LikePost",
+			urlId:              "64a399cdb6a0487490ed730c",
+			validToken:         ValidToken,
+			expectedError:      nil,
+			expectedStatusCode: 200,
+		},
+		{
+			name:               "Error on LikePost",
+			urlId:              "64a399cdb6a0487490ed730c",
+			validToken:         ValidToken,
+			expectedError:      assert.AnError,
+			expectedStatusCode: 500,
+		},
+		{
+			name:               "Wrong postID",
+			urlId:              "2222",
+			validToken:         ValidToken,
+			expectedError:      assert.AnError,
+			expectedStatusCode: 500,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewPostsRepositoryMock()
+			repositoryMock.On("Like", test.urlId).Return(test.expectedError)
+
+			postsController := NewPostsController(repositoryMock)
+
+			req, _ := http.NewRequest("POST", "/posts/", nil)
+			req.Header.Add("Authorization", "Bearer "+test.validToken)
+			params := map[string]string{
+				"postID": test.urlId,
+			}
+			req = mux.SetURLVars(req, params)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(postsController.LikePost)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
+}
+
+func TestDislikePost(t *testing.T) {
+
+	tests := []struct {
+		name               string
+		urlId              string
+		validToken         string
+		expectedError      error
+		expectedStatusCode int
+	}{
+		{
+			name:               "Success on DislikePost",
+			urlId:              "64a399cdb6a0487490ed730c",
+			validToken:         ValidToken,
+			expectedError:      nil,
+			expectedStatusCode: 200,
+		},
+		{
+			name:               "Error on DislikePost",
+			urlId:              "64a399cdb6a0487490ed730c",
+			validToken:         ValidToken,
+			expectedError:      assert.AnError,
+			expectedStatusCode: 500,
+		},
+		{
+			name:               "Wrong postID",
+			urlId:              "2222",
+			validToken:         ValidToken,
+			expectedError:      assert.AnError,
+			expectedStatusCode: 500,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repositoryMock := mocks.NewPostsRepositoryMock()
+			repositoryMock.On("Dislike", test.urlId).Return(test.expectedError)
+
+			postsController := NewPostsController(repositoryMock)
+
+			req, _ := http.NewRequest("POST", "/posts/", nil)
+			req.Header.Add("Authorization", "Bearer "+test.validToken)
+			params := map[string]string{
+				"postID": test.urlId,
+			}
+			req = mux.SetURLVars(req, params)
+
+			rr := httptest.NewRecorder()
+
+			controller := http.HandlerFunc(postsController.DislikePost)
+			controller.ServeHTTP(rr, req)
+
+			assert.Equal(t, test.expectedStatusCode, rr.Code)
+		})
+	}
 }
